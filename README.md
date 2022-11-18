@@ -3,7 +3,7 @@
 # Como eu posso rodar ele?
 
 ## Requisitos
-- [Compilador de C](https://www.rust-lang.org/)
+- [Compilador de Rust](https://www.rust-lang.org/)
 - [Token do discord](https://discord.com/developers/applications)
 
 ## Arquivo de configuração
