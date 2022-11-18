@@ -13,7 +13,7 @@ pub const BUILT_AS: &str = "Debug";
 pub const BUILT_AS: &str = "Release (Production)";
 
 ///〔🛠️ Depuração〕Veja minhas informações
-#[poise::command(slash_command)]
+#[poise::command(prefix_command, slash_command)]
 pub async fn status(cx: Context<'_>) -> Result<()> {
     let (used, used_by_children) =
         current_total_memory_usage(&mut *cx.data().system.write().await).unwrap_or((0, 0));

@@ -1,14 +1,16 @@
 use crate::{
-    commands::{general::ping::ping, information::status::status},
+    commands::{general::ping::ping, information::status::status, staff::servidor::servidor},
     primitives::State,
 };
 use anyhow::{Context, Result};
-use dotenv::dotenv;
+use dotenvy::dotenv;
 use poise::{
-    samples::register_in_guild,
+    builtins::register_in_guild,
     serenity_prelude::{CacheHttp, GatewayIntents, GuildId},
-    Framework, FrameworkOptions,
+    Framework, FrameworkOptions, Prefix, PrefixFrameworkOptions,
 };
+
+use crate::primitives::Database;
 use std::{env, fs, path::Path, process, time::Instant};
 use sysinfo::{System, SystemExt};
 use tokio::sync::RwLock;
@@ -48,13 +50,18 @@ async fn main() -> Result<()> {
         .parse()
         .context("Failed to parse $DISCORD_GUILD_ID as a valid integer!")?;
 
-    let commands = vec![ping(), status()];
+    let commands = vec![ping(), status(), servidor()];
 
     let framework = Framework::builder()
         .token(env::var("DISCORD_TOKEN").context("Failed to read $DISCORD_TOKEN")?)
-        .intents(GatewayIntents::privileged())
+        .intents(GatewayIntents::non_privileged() | GatewayIntents::MESSAGE_CONTENT)
         .options(FrameworkOptions {
             commands,
+            prefix_options: PrefixFrameworkOptions {
+                prefix: Some("$".into()),
+                additional_prefixes: vec![Prefix::Literal(">>"), Prefix::Literal("$ ")],
+                ..Default::default()
+            },
             ..Default::default()
         })
         .setup(move |cx, _, f| {
@@ -62,6 +69,11 @@ async fn main() -> Result<()> {
                 register_in_guild(&cx.http(), &f.options().commands, GuildId(guild_id)).await?;
 
                 Ok(State {
+                    database: Database::init_from_directory(
+                        &env::var("DATABASE_LOCATION")
+                            .context("Failed to read $DATABASE_LOCATION")?,
+                    )
+                    .await?,
                     uptime: Instant::now(),
                     system: RwLock::new(System::new()),
                 })
