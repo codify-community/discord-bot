@@ -14,10 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-
-    - name: Set-Up
-      run: rustup update stable
-
     - name: Build
       run: cargo build --verbose
       
@@ -25,10 +21,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-
-    - name: Set-Up
-      run: rustup update stable
-    
     - name: Run tests
       run: cargo test --verbose
       
@@ -36,10 +28,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      
-      - name: Set-Up
-        run: rustup update stable
-
       - name: Run clippy
         run: cargo clippy -- -D warnings
         
@@ -47,9 +35,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-
-      - name: Set-Up
-        run: rustup update stable
-
       - name: Run cargofmt
         run: cargo fmt --all -- --check
