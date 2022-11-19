@@ -12,7 +12,10 @@ pub async fn ping(cx: Context<'_>) -> Result<()> {
 
     handle
         .edit(cx, |m| {
-            m.content(format!(":butterfly: Atualmente estou com `{:.2?}` de delay com a API do discord.", time.elapsed()))
+            m.content(format!(
+                ":butterfly: Atualmente estou com `{:.2?}` de delay com a API do discord.",
+                time.elapsed()
+            ))
         })
         .await?;
     Ok(())
