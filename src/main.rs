@@ -22,6 +22,7 @@ use tracing_subscriber::EnvFilter;
 
 mod commands;
 mod event_handler;
+mod handlers;
 mod primitives;
 mod utils;
 
