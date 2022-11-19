@@ -1,5 +1,8 @@
 use crate::{
-    commands::{general::ping::ping, information::status::status, staff::servidor::servidor, utils::userinfo::userinfo},
+    commands::{
+        general::ping::ping, information::status::status, staff::servidor::servidor,
+        utils::userinfo::userinfo,
+    },
     primitives::State,
 };
 use anyhow::{Context, Result};
