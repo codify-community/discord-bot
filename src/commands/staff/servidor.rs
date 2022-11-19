@@ -97,8 +97,7 @@ pub async fn registro_add_role(
         .data()
         .database
         .auto_rules_messages
-        .read(move |ar| ar.to_owned().into_iter().find(|i| i.category == nome))?
-        .map(|it| it)
+        .read(move |ar| ar.clone().into_iter().find(|i| i.category == nome))?
         .context("Não foi possivel encontrar a categoria.")?;
 
     let mut message = cx
@@ -114,7 +113,7 @@ pub async fn registro_add_role(
         cargo.mention()
     ));
 
-    let embed = embed.to_owned();
+    let embed = embed.clone();
     message
         .edit(cx.http(), |m| m.set_embed(embed.into()))
         .await?;
