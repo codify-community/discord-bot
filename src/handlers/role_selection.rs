@@ -1,5 +1,3 @@
-
-
 use anyhow::Context as _;
 use poise::serenity_prelude::{
     ActionRowComponent, Context, Embed, MessageComponentInteraction, Role, RoleId,
@@ -122,7 +120,8 @@ pub async fn on_interaction_component_create(
 
             let to_remove: Vec<_> = roles
                 .iter()
-                .filter(|m| member_roles.contains(m)).copied()
+                .filter(|m| member_roles.contains(m))
+                .copied()
                 .collect();
 
             if !to_remove.is_empty() {
