@@ -1,5 +1,5 @@
 use crate::{
-    commands::{general::ping::ping, information::status::status},
+    commands::{general::ping::ping, information::status::status, utils::userinfo::userinfo},
     primitives::State,
 };
 use anyhow::{Context, Result};
@@ -48,7 +48,7 @@ async fn main() -> Result<()> {
         .parse()
         .context("Failed to parse $DISCORD_GUILD_ID as a valid integer!")?;
 
-    let commands = vec![ping(), status()];
+    let commands = vec![ping(), status(), userinfo()];
 
     let framework = Framework::builder()
         .token(env::var("DISCORD_TOKEN").context("Failed to read $DISCORD_TOKEN")?)
