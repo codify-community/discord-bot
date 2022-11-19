@@ -1,6 +1,6 @@
-use crate::primitives::{AutoRole, Context};
+use crate::primitives::{AutoRole, Context, REGISTRO_ROLE_MARKER};
 use anyhow::{Context as _, Result};
-use poise::serenity_prelude::{CacheHttp, ChannelId, Colour, Mentionable, Role};
+use poise::serenity_prelude::{ButtonStyle, CacheHttp, ChannelId, Colour, Mentionable, Role};
 use std::{env, time::Instant};
 
 #[poise::command(
@@ -49,6 +49,15 @@ pub async fn registro_add_category(
                     .image(imagem)
                     .colour(Colour::FOOYOO)
                     .description(descricao)
+            })
+            .components(|c| {
+                c.create_action_row(|row| {
+                    row.create_button(|b| {
+                        b.label("Selecionar cargos")
+                            .style(ButtonStyle::Secondary)
+                            .custom_id("registro-select-roles")
+                    })
+                })
             })
         })
         .await?;
@@ -100,7 +109,7 @@ pub async fn registro_add_role(
     let embed = message.embeds.first_mut().context("Mensagem inválida")?;
 
     embed.description = Some(format!(
-        "{}\n **·** {}",
+        "{}\n{REGISTRO_ROLE_MARKER} {}",
         embed.description.as_ref().context("Mensagem inválida")?,
         cargo.mention()
     ));

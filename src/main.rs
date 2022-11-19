@@ -6,11 +6,12 @@ use anyhow::{Context, Result};
 use dotenvy::dotenv;
 use poise::{
     builtins::register_in_guild,
-    serenity_prelude::{CacheHttp, GatewayIntents, GuildId},
-    Framework, FrameworkOptions, Prefix, PrefixFrameworkOptions,
+    serenity_prelude::{CacheHttp, GatewayIntents, GuildId, Role},
+    Event, Framework, FrameworkOptions, Prefix, PrefixFrameworkOptions,
 };
 
-use crate::primitives::Database;
+use crate::primitives::{Database, REGISTRO_ROLE_MARKER};
+use poise::serenity_prelude::Interaction;
 use std::{env, fs, path::Path, process, time::Instant};
 use sysinfo::{System, SystemExt};
 use tokio::sync::RwLock;
@@ -62,6 +63,60 @@ async fn main() -> Result<()> {
                 additional_prefixes: vec![Prefix::Literal(">>"), Prefix::Literal("$ ")],
                 ..Default::default()
             },
+            event_handler: |cx, event, _fw, state| {
+                Box::pin(async move {
+                    let guild_id = state.guild_id;
+                    match event {
+                        Event::InteractionCreate { interaction } => match interaction {
+                            Interaction::MessageComponent(component) => {
+                                if let Some(embed) = component.message.embeds.first() {
+                                    if let Some(ref description) = embed.description {
+                                        let roles_id: Vec<Role> = description
+                                            .lines()
+                                            .filter(|l| l.starts_with(REGISTRO_ROLE_MARKER))
+                                            .map(|l| {
+                                                l.replace(REGISTRO_ROLE_MARKER, "")
+                                                    .trim()
+                                                    .to_string()
+                                            })
+                                            .map(|l| {
+                                                l.chars()
+                                                    .filter(|c| c.is_numeric())
+                                                    .collect::<String>()
+                                            })
+                                            .map(|s| s.parse::<u64>())
+                                            .flatten()
+                                            .map(|rid| cx.cache.role(guild_id, rid))
+                                            .flatten()
+                                            .collect();
+
+                                        component
+                                            .create_interaction_response(cx.http(), |m| {
+                                                m.interaction_response_data(|d| {
+                                                    d.ephemeral(true).components(|c| c.create_action_row(|row| {
+                                                       row.create_select_menu(|sm| {
+                                                            sm.custom_id("role-resolve").placeholder("Por favor selecione alguma opção").min_values(1).max_values(roles_id.len() as _).options(|opts| {
+                                                                for role in roles_id {
+                                                                    opts.create_option(|o| o.label(role.name).value(role.id));
+                                                                }
+
+                                                                opts
+                                                            })
+                                                        })
+                                                    }))
+                                                })
+                                            })
+                                            .await?;
+                                    }
+                                }
+                            }
+                            _ => {}
+                        },
+                        _ => {}
+                    }
+                    Ok(())
+                })
+            },
             ..Default::default()
         })
         .setup(move |cx, _, f| {
@@ -69,6 +124,7 @@ async fn main() -> Result<()> {
                 register_in_guild(&cx.http(), &f.options().commands, GuildId(guild_id)).await?;
 
                 Ok(State {
+                    guild_id,
                     database: Database::init_from_directory(
                         &env::var("DATABASE_LOCATION")
                             .context("Failed to read $DATABASE_LOCATION")?,

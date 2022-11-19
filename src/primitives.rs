@@ -1,11 +1,12 @@
 use anyhow::Context as _;
-use poise::serenity_prelude::MessageId;
 use rustbreak::{deser::Ron, FileDatabase};
 use serde::{Deserialize, Serialize};
 use std::{path::Path, time::Instant};
 use sysinfo::System;
 use tokio::{fs, sync::RwLock};
 use tracing::{debug, info};
+
+pub const REGISTRO_ROLE_MARKER: &str = " **·**";
 
 #[derive(Clone, Deserialize, Serialize)]
 pub struct AutoRole {
@@ -43,6 +44,7 @@ pub struct State {
     pub uptime: Instant,
     pub system: RwLock<System>,
     pub database: Database,
+    pub guild_id: u64,
 }
 
 pub type Context<'a> = poise::Context<'a, State, anyhow::Error>;
