@@ -2,6 +2,7 @@ use crate::{primitives::Context, utils::time::get_discord_relative_time};
 use anyhow::Result;
 use poise::serenity_prelude as serenity;
 
+/// [🧰 utilidades] Pegue as informações de um usuário
 #[poise::command(slash_command, prefix_command)]
 pub async fn userinfo(
     cx: Context<'_>,
