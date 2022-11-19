@@ -10,7 +10,8 @@ use tracing::{debug, info};
 #[derive(Clone, Deserialize, Serialize)]
 pub struct AutoRole {
     pub category: String,
-    pub id: MessageId,
+    pub id: u64,
+    pub channel_id: u64,
 }
 
 pub struct Database {
