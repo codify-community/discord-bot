@@ -23,9 +23,16 @@ pub async fn userinfo(
     let account_age_timestamp: i64 = user.created_at().timestamp();
     let account_age = get_discord_relative_time(account_age_timestamp);
 
-    let avatar = user.avatar_url().unwrap();
-    let roles = member.roles(cx).unwrap().into_iter();
-    let roles_str = format!("`{}`", roles.map(|r| r.name).collect::<Vec<_>>().join(", "));
+    let avatar = user.avatar_url().unwrap_or_else(|| user.default_avatar_url());
+
+    let roles = member.roles(cx).unwrap_or_default().into_iter();
+    let mut roles_str = roles.map(|r| r.name).collect::<Vec<_>>().join(", ");
+
+    if roles_str.is_empty() {
+        roles_str = "O usuário não contem nenhum cargo".to_string();
+    } else {
+        roles_str = format!("`{}`", roles_str);
+    }
 
     cx.send(|m| {
         m.embed(|e| {
