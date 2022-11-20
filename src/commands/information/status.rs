@@ -1,6 +1,6 @@
 use crate::{
     primitives::Context,
-    utils::{process::current_total_memory_usage, time::relative_time},
+    utils::{process::current_total_memory_usage, time::relative_since},
 };
 use anyhow::Result;
 use poise::serenity_prelude::Colour;
@@ -29,7 +29,7 @@ pub async fn status(cx: Context<'_>) -> Result<()> {
     💻 Uso de memoria por subprocessos: `{:.1} MiB`
     "#,
         env!("CARGO_PKG_VERSION"),
-        relative_time(cx.data().uptime.elapsed().as_secs()),
+        relative_since(cx.data().uptime.elapsed().as_secs()),
         system.name().unwrap_or_default(),
         system.kernel_version().unwrap_or_default(),
         used / (1024 * 1024),

@@ -9,6 +9,11 @@ pub fn default_time() -> u64 {
 }
 
 #[inline]
-pub fn relative_time(relative_to: u64) -> String {
-    format!("<t:{}:R>", default_time() - relative_to)
+pub fn relative_since(secs: u64) -> String {
+    get_relative_time(default_time() - secs)
+}
+
+#[inline]
+pub fn get_relative_time(time: u64) -> String {
+    format!("<t:{time}:R>")
 }

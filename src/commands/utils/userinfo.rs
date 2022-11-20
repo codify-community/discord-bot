@@ -1,4 +1,4 @@
-use crate::primitives::Context;
+use crate::{primitives::Context, utils::time::get_relative_time};
 use anyhow::Result;
 use poise::serenity_prelude as serenity;
 
@@ -41,12 +41,12 @@ pub async fn userinfo(
             e.field("💻 **Id de usuário:**", user_id, true);
             e.field(
                 "📅 **Conta criada há:**",
-                format!("<t:{account_age}:R>"),
+                get_relative_time(account_age as u64),
                 true,
             );
             e.field(
                 "🌟 **Entrou no servidor há:**",
-                format!("<t:{joined_at}:R>"),
+                get_relative_time(joined_at as u64),
                 false,
             );
             e.field("📚 **Cargos:**", roles_str, false);
