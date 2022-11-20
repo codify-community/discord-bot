@@ -1,4 +1,4 @@
-use crate::{primitives::Context, utils::time::get_discord_relative_time};
+use crate::primitives::Context;
 use anyhow::Result;
 use poise::serenity_prelude as serenity;
 
@@ -16,18 +16,16 @@ pub async fn userinfo(
 
     let member = guild.member(cx, user.id).await.unwrap();
 
-    let joined_at_timestamp: i64 = member.joined_at.unwrap().timestamp();
-    let joined_at = get_discord_relative_time(joined_at_timestamp);
+    let joined_at = member.joined_at.unwrap().timestamp();
 
-    let account_age_timestamp: i64 = user.created_at().timestamp();
-    let account_age = get_discord_relative_time(account_age_timestamp);
+    let account_age = user.created_at().timestamp();
 
     let description = format!(
         r#"
-            -> **Nome do usuário:**     {user_name} 
-            -> **ID do usuário:**       {user_id}   
-            -> **Entrou no servidor:**  {joined_at}
-            -> **Conta criada: **       {account_age}
+            -> **Nome do usuário:**     `{user_name}`
+            -> **ID do usuário:**       `{user_id}`
+            -> **Entrou no servidor:**  <t:{joined_at}:R>
+            -> **Conta criada: **       <t:{account_age}:R>
         "#
     );
 

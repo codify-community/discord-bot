@@ -8,7 +8,6 @@ edition = "2021"
 [dependencies]
 anyhow = "1.0.66"
 dotenvy = "0.15.6"
-humansize = "2.1.2"
 poise = { git = "https://github.com/kangalioo/poise.git", version = "0.4.1" }
 rustbreak = { version = "2.0.0", features = ["ron_enc"], default-features = false }
 serde = { version = "1.0.147", features = ["derive"] }

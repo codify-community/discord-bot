@@ -1,9 +1,8 @@
 use crate::{
     primitives::Context,
-    utils::{process::current_total_memory_usage, time::HumanDate},
+    utils::{process::current_total_memory_usage, time::relative_time},
 };
 use anyhow::Result;
-use humansize::{format_size, DECIMAL};
 use poise::serenity_prelude::Colour;
 use sysinfo::SystemExt;
 
@@ -23,18 +22,18 @@ pub async fn status(cx: Context<'_>) -> Result<()> {
     let description = format!(
         r#"
     💻 Versão: `{}`
-    💻 Uptime: `{}` 
-    💻 Ambiente: `{BUILT_AS}` 
-    💻 Sistema: `{} v{}` 
-    💻 Uso de memoria: `{}` 
-    💻 Uso de memoria por subprocessos: `{}`
+    💻 Uptime: {}
+    💻 Ambiente: `{BUILT_AS}`
+    💻 Sistema: `{} v{}`
+    💻 Uso de memoria: `{} MiB`
+    💻 Uso de memoria por subprocessos: `{:.1} MiB`
     "#,
         env!("CARGO_PKG_VERSION"),
-        HumanDate(cx.data().uptime.elapsed(),),
+        relative_time(cx.data().uptime.elapsed().as_secs()),
         system.name().unwrap_or_default(),
         system.kernel_version().unwrap_or_default(),
-        format_size(used, DECIMAL),
-        format_size(used_by_children, DECIMAL),
+        used / (1024 * 1024),
+        used_by_children as f64 / (1024.0 * 1024.0),
     )
     .trim_start()
     .to_string();
