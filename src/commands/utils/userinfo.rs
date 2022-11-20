@@ -23,7 +23,9 @@ pub async fn userinfo(
     let account_age_timestamp: i64 = user.created_at().timestamp();
     let account_age = get_discord_relative_time(account_age_timestamp);
 
-    let avatar = user.avatar_url().unwrap_or_else(|| user.default_avatar_url());
+    let avatar = user
+        .avatar_url()
+        .unwrap_or_else(|| user.default_avatar_url());
 
     let roles = member.roles(cx).unwrap_or_default().into_iter();
     let mut roles_str = roles.map(|r| r.name).collect::<Vec<_>>().join(", ");
