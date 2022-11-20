@@ -11,8 +11,9 @@ pub async fn userinfo(
     let user = user.as_ref().unwrap_or_else(|| cx.author());
     let guild = cx.partial_guild().await.unwrap();
 
-    let user_name = user.tag();
-    let user_id = user.id;
+    let user_name = format!("`{}`", user.name);
+    let user_tag = format!("`{}`", user.tag());
+    let user_id = format!("`{}`", user.id);
 
     let member = guild.member(cx, user.id).await.unwrap();
 
@@ -20,20 +21,37 @@ pub async fn userinfo(
 
     let account_age = user.created_at().timestamp();
 
-    let description = format!(
-        r#"
-            -> **Nome do usuário:**     `{user_name}`
-            -> **ID do usuário:**       `{user_id}`
-            -> **Entrou no servidor:**  <t:{joined_at}:R>
-            -> **Conta criada: **       <t:{account_age}:R>
-        "#
-    );
+    let avatar = user
+        .avatar_url()
+        .unwrap_or_else(|| user.default_avatar_url());
+
+    let roles = member.roles(cx).unwrap_or_default().into_iter();
+    let mut roles_str = roles.map(|r| r.name).collect::<Vec<_>>().join(", ");
+
+    if roles_str.is_empty() {
+        roles_str = "O usuário não contem nenhum cargo".to_string();
+    } else {
+        roles_str = format!("`{}`", roles_str);
+    }
 
     cx.send(|m| {
         m.embed(|e| {
-            e.title(format!("Informações do usuário: `{user_name}`"))
+            e.title(format!("Informações do usuário: {user_name}"));
+            e.field("🔖 **Tag do discord:**", user_tag, true);
+            e.field("💻 **Id de usuário:**", user_id, true);
+            e.field(
+                "📅 **Conta criada há:**",
+                format!("<t:{account_age}:R>"),
+                true,
+            );
+            e.field(
+                "🌟 **Entrou no servidor há:**",
+                format!("<t:{joined_at}:R>"),
+                false,
+            );
+            e.field("📚 **Cargos:**", roles_str, false);
+            e.thumbnail(avatar)
                 .colour(serenity::Colour::DARK_PURPLE)
-                .description(description)
                 .footer(|f| f.text(format!("Comando pedido por {}", cx.author().tag())))
         })
     })
