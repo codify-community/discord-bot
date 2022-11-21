@@ -1,6 +1,9 @@
 use crate::{
     commands::{
-        general::ping::ping, information::status::status, staff::servidor::servidor,
+        admin::{ban::ban, unban::unban},
+        general::ping::ping,
+        information::status::status,
+        staff::servidor::servidor,
         utils::userinfo::userinfo,
     },
     primitives::State,
@@ -55,11 +58,11 @@ async fn main() -> Result<()> {
         .parse()
         .context("Failed to parse $DISCORD_GUILD_ID as a valid integer!")?;
 
-    let commands = vec![ping(), status(), servidor(), userinfo()];
+    let commands = vec![ping(), status(), servidor(), userinfo(), ban(), unban()];
 
     let framework = Framework::builder()
         .token(env::var("DISCORD_TOKEN").context("Failed to read $DISCORD_TOKEN")?)
-        .intents(GatewayIntents::non_privileged() | GatewayIntents::MESSAGE_CONTENT)
+        .intents(GatewayIntents::all())
         .options(FrameworkOptions {
             commands,
             prefix_options: PrefixFrameworkOptions {
