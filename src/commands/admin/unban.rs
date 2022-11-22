@@ -1,7 +1,6 @@
 use std::future::ready;
-
 use crate::primitives::Context;
-use anyhow::{anyhow, Result};
+use anyhow::{Result, Context as _};
 use poise::{
     futures_util::{stream, Stream, StreamExt},
     serenity_prelude::UserId,
@@ -27,7 +26,7 @@ pub async fn unban(
     #[autocomplete = "autocomplete_bans"]
     user: UserId,
 ) -> Result<()> {
-    let guild = cx.guild().ok_or_else(|| anyhow!("No Guild!"))?;
+    let guild = cx.guild().context("No Guild!")?;
     guild.unban(cx, user).await?;
 
     cx.say("Usuário desbanido!").await?;
