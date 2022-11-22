@@ -19,7 +19,11 @@ async fn autocomplete_bans<'a>(
 }
 
 ///〔🛡️ Administração〕 Bana um usuário
-#[poise::command(slash_command, prefix_command)]
+#[poise::command(
+    slash_command,
+    prefix_command,
+    default_member_permissions = "BAN_MEMBERS"
+)]
 pub async fn unban(
     ctx: Context<'_>,
     #[description = "Usuário"]
