@@ -3,7 +3,11 @@ use anyhow::Result;
 use poise::serenity_prelude::Member;
 
 ///〔🛡️ Administração〕 Bana um usuário
-#[poise::command(slash_command, prefix_command)]
+#[poise::command(
+    slash_command,
+    prefix_command,
+    default_member_permissions = "BAN_MEMBERS"
+)]
 pub async fn ban(
     ctx: Context<'_>,
     #[description = "Usuário"] user: Member,
