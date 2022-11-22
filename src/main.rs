@@ -70,14 +70,14 @@ async fn main() -> Result<()> {
                 additional_prefixes: vec![Prefix::Literal(">>"), Prefix::Literal("$ ")],
                 ..Default::default()
             },
-            event_handler: |cx, event, _fw, state| {
-                Box::pin(event_handler::handle_event(cx, event, state))
+            event_handler: |ctx, event, _fw, state| {
+                Box::pin(event_handler::handle_event(ctx, event, state))
             },
             ..Default::default()
         })
-        .setup(move |cx, _, f| {
+        .setup(move |ctx, _, f| {
             Box::pin(async move {
-                register_in_guild(&cx.http(), &f.options().commands, GuildId(guild_id)).await?;
+                register_in_guild(&ctx.http(), &f.options().commands, GuildId(guild_id)).await?;
 
                 Ok(State {
                     guild_id,

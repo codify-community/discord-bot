@@ -7,10 +7,10 @@ use poise::{
 use std::future::ready;
 
 async fn autocomplete_bans<'a>(
-    cx: Context<'_>,
+    ctx: Context<'_>,
     partial: &'a str,
 ) -> impl Stream<Item = poise::AutocompleteChoice<UserId>> + 'a {
-    stream::iter(cx.guild().unwrap().bans(cx).await.unwrap())
+    stream::iter(ctx.guild().unwrap().bans(ctx).await.unwrap())
         .filter(move |ban| ready(ban.user.name.contains(partial)))
         .map(|ban| poise::AutocompleteChoice {
             name: ban.user.name,
@@ -21,15 +21,15 @@ async fn autocomplete_bans<'a>(
 ///〔🛡️ Administração〕 Bana um usuário
 #[poise::command(slash_command, prefix_command)]
 pub async fn unban(
-    cx: Context<'_>,
+    ctx: Context<'_>,
     #[description = "Usuário"]
     #[autocomplete = "autocomplete_bans"]
     user: UserId,
 ) -> Result<()> {
-    let guild = cx.guild().context("No Guild!")?;
-    guild.unban(cx, user).await?;
+    let guild = ctx.guild().context("No Guild!")?;
+    guild.unban(ctx, user).await?;
 
-    cx.say("Usuário desbanido!").await?;
+    ctx.say("Usuário desbanido!").await?;
 
     Ok(())
 }

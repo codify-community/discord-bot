@@ -6,12 +6,12 @@ use poise::{
 
 use crate::{handlers::role_selection::on_interaction_component_create, primitives::State};
 
-pub async fn handle_event(cx: &Context, event: &Event<'_>, state: &State) -> Result<()> {
+pub async fn handle_event(ctx: &Context, event: &Event<'_>, state: &State) -> Result<()> {
     match event {
         Event::InteractionCreate {
             interaction: Interaction::MessageComponent(component),
         } => {
-            on_interaction_component_create(cx, component, state).await?;
+            on_interaction_component_create(ctx, component, state).await?;
         }
 
         Event::Ready { .. } => {

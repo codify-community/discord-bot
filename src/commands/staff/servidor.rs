@@ -9,7 +9,7 @@ use std::{env, time::Instant};
     aliases("sv", "svctl", "systemctl"),
     subcommands("registro_add_category", "registro_add_role")
 )]
-pub async fn servidor(_cx: Context<'_>) -> Result<()> {
+pub async fn servidor(_ctx: Context<'_>) -> Result<()> {
     Ok(())
 }
 
@@ -21,29 +21,29 @@ pub async fn servidor(_cx: Context<'_>) -> Result<()> {
     default_member_permissions = "MANAGE_GUILD"
 )]
 pub async fn registro_add_category(
-    cx: Context<'_>,
+    ctx: Context<'_>,
     #[description = "Por favor indique o nome da categoria"] nome: String,
     #[description = "Por favor indique a imagem da categoria"] imagem: String,
     #[description = "Por favor indique a descrição da categoria"] descricao: String,
 ) -> Result<()> {
     let started = Instant::now();
-    let handle = cx.say(":stopwatch:").await?;
+    let handle = ctx.say(":stopwatch:").await?;
     let registro_id = env::var("CODIFY_REGISTRO_ID")
         .context("Can't get $CODIFY_REGISTRO_ID")?
         .parse()
         .context("Invalid Registro ID!")?;
 
-    let Some(channel)  = cx.guild()
+    let Some(channel)  = ctx.guild()
         .unwrap()
         .channels
         .iter()
         .find(|it| *it.0 == ChannelId(registro_id)).map(|(_k, v)| v.id()) else {
-            cx.say("Não achei o canal de registro, bad config?").await?;
+            ctx.say("Não achei o canal de registro, bad config?").await?;
             return Ok(());
         };
 
     let message = channel
-        .send_message(cx.http(), |m| {
+        .send_message(ctx.http(), |m| {
             m.embed(|e| {
                 e.title(&nome)
                     .image(imagem)
@@ -62,17 +62,17 @@ pub async fn registro_add_category(
         })
         .await?;
 
-    cx.data().database.auto_rules_messages.write(|ar| {
+    ctx.data().database.auto_rules_messages.write(|ar| {
         ar.push(AutoRole {
             category: nome,
             id: message.id.0,
             channel_id: message.channel_id.0,
         });
     })?;
-    cx.data().database.auto_rules_messages.save()?;
+    ctx.data().database.auto_rules_messages.save()?;
 
     handle
-        .edit(cx, |m| {
+        .edit(ctx, |m| {
             m.content(format!("OK in {:.2?}", started.elapsed()))
         })
         .await?;
@@ -87,20 +87,20 @@ pub async fn registro_add_category(
     default_member_permissions = "MANAGE_GUILD"
 )]
 pub async fn registro_add_role(
-    cx: Context<'_>,
+    ctx: Context<'_>,
     #[description = "Por favor indique o nome da categoria"] nome: String,
     #[description = "Por favor indique um cargo"] cargo: Role,
 ) -> Result<()> {
     let started = Instant::now();
-    let handle = cx.say(":stopwatch:").await?;
-    let ar_message = cx
+    let handle = ctx.say(":stopwatch:").await?;
+    let ar_message = ctx
         .data()
         .database
         .auto_rules_messages
         .read(move |ar| ar.clone().into_iter().find(|i| i.category == nome))?
         .context("Não foi possivel encontrar a categoria.")?;
 
-    let mut message = cx
+    let mut message = ctx
         .http()
         .get_message(ar_message.channel_id, ar_message.id)
         .await?;
@@ -115,11 +115,11 @@ pub async fn registro_add_role(
 
     let embed = embed.clone();
     message
-        .edit(cx.http(), |m| m.set_embed(embed.into()))
+        .edit(ctx.http(), |m| m.set_embed(embed.into()))
         .await?;
 
     handle
-        .edit(cx, |m| {
+        .edit(ctx, |m| {
             m.content(format!("OK in {:.2?}", started.elapsed()))
         })
         .await?;

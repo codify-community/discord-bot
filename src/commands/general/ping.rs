@@ -6,12 +6,12 @@ use crate::primitives::Context;
 
 ///〔🦁 Geral〕 Veja meu ping
 #[poise::command(prefix_command, slash_command)]
-pub async fn ping(cx: Context<'_>) -> Result<()> {
+pub async fn ping(ctx: Context<'_>) -> Result<()> {
     let time = Instant::now();
-    let handle = cx.say(":stopwatch: um momento...").await?;
+    let handle = ctx.say(":stopwatch: um momento...").await?;
 
     handle
-        .edit(cx, |m| {
+        .edit(ctx, |m| {
             m.content(format!(
                 ":butterfly: Atualmente estou com `{:.2?}` de delay com a API do discord.",
                 time.elapsed()

@@ -5,7 +5,7 @@ use poise::serenity_prelude::{
 
 use crate::primitives::{State, REGISTRO_ROLE_MARKER};
 
-fn get_roles_from_embed(cx: &Context, guild_id: u64, embed: &Embed) -> Option<Vec<Role>> {
+fn get_roles_from_embed(ctx: &Context, guild_id: u64, embed: &Embed) -> Option<Vec<Role>> {
     let description = embed.description.clone()?;
 
     let roles: Vec<Role> = description
@@ -14,20 +14,21 @@ fn get_roles_from_embed(cx: &Context, guild_id: u64, embed: &Embed) -> Option<Ve
         .map(|l| l.replace(REGISTRO_ROLE_MARKER, "").trim().to_string())
         .map(|l| l.chars().filter(|c| c.is_numeric()).collect::<String>())
         .flat_map(|s| s.parse::<u64>())
-        .filter_map(|rid| cx.cache.role(guild_id, rid))
+        .filter_map(|rid| ctx.cache.role(guild_id, rid))
         .collect();
 
     Some(roles)
 }
 
 pub async fn on_interaction_component_create(
-    cx: &Context,
+    ctx: &Context,
     component: &MessageComponentInteraction,
     state: &State,
 ) -> anyhow::Result<()> {
     let guild_id = state.guild_id;
 
-    let roles_from_embed = || get_roles_from_embed(cx, guild_id, component.message.embeds.first()?);
+    let roles_from_embed =
+        || get_roles_from_embed(ctx, guild_id, component.message.embeds.first()?);
 
     match component.data.custom_id.as_str() {
         "registro-select-roles" => {
@@ -36,7 +37,7 @@ pub async fn on_interaction_component_create(
             let roles = roles_from_embed().context("Failed do get roles from embed")?;
 
             if roles.is_empty() {
-                component.create_interaction_response(&cx.http, |m| {
+                component.create_interaction_response(&ctx.http, |m| {
                                 m.interaction_response_data(|d| {
                                     d.ephemeral(true).content("A direção do servidor ainda não configurou essa seção. Por favor aguarde até que eles configurem. ")
                                 })
@@ -48,7 +49,7 @@ pub async fn on_interaction_component_create(
             tracing::trace!("Found {roles:?} in message.");
 
             component
-                .create_interaction_response(&cx.http, |m| {
+                .create_interaction_response(&ctx.http, |m| {
                     m.interaction_response_data(|d| {
                         d.ephemeral(true).components(|c| {
                             c.create_action_row(|row| {
@@ -75,7 +76,7 @@ pub async fn on_interaction_component_create(
         }
 
         "role-resolve" => {
-            component.defer(&cx.http).await?;
+            component.defer(&ctx.http).await?;
             tracing::debug!("Received role-resolve event");
             let to_add: Vec<RoleId> = component
                 .data
@@ -87,14 +88,14 @@ pub async fn on_interaction_component_create(
 
             tracing::info!(user = ?component.user, "Add {to_add:?}");
 
-            let mut member = cx
+            let mut member = ctx
                 .http
                 .get_member(guild_id, component.user.id.0)
                 .await
                 .context("Can't find member!")?;
 
             let member_roles: Vec<RoleId> = member
-                .roles(&cx.cache)
+                .roles(&ctx.cache)
                 .context("Failed to get roles")?
                 .into_iter()
                 .map(|p| p.id)
@@ -114,7 +115,7 @@ pub async fn on_interaction_component_create(
                 .iter()
                 .map(|it| it.value.clone())
                 .flat_map(|s| s.parse::<u64>())
-                .filter_map(|rid| cx.cache.role(guild_id, rid))
+                .filter_map(|rid| ctx.cache.role(guild_id, rid))
                 .map(|p| p.id)
                 .collect();
 
@@ -127,17 +128,17 @@ pub async fn on_interaction_component_create(
             if !to_remove.is_empty() {
                 tracing::info!("Removing {to_remove:?} roles from {}.", component.user.id);
 
-                member.remove_roles(&cx.http, &to_remove).await?;
+                member.remove_roles(&ctx.http, &to_remove).await?;
             }
 
             if !to_add.is_empty() {
                 tracing::info!("Adding {to_add:?} roles to {}.", component.user.id);
 
-                member.add_roles(&cx.http, &to_add).await?;
+                member.add_roles(&ctx.http, &to_add).await?;
             }
 
             component
-                    .create_followup_message(&cx.http, |m| {
+                    .create_followup_message(&ctx.http, |m| {
                         m.ephemeral(true).content(
                             "Prontinho! Caso você queira remover ou adicionar novos cargos é só clicar no `Selecionar Cargos` novamente.",
                         )

@@ -13,11 +13,11 @@ pub const BUILT_AS: &str = "Release (Production)";
 
 ///〔🛠️ Depuração〕Veja minhas informações
 #[poise::command(prefix_command, slash_command)]
-pub async fn status(cx: Context<'_>) -> Result<()> {
+pub async fn status(ctx: Context<'_>) -> Result<()> {
     let (used, used_by_children) =
-        current_total_memory_usage(&mut *cx.data().system.write().await).unwrap_or((0, 0));
+        current_total_memory_usage(&mut *ctx.data().system.write().await).unwrap_or((0, 0));
 
-    let system = cx.data().system.read().await;
+    let system = ctx.data().system.read().await;
 
     let description = format!(
         r#"
@@ -29,7 +29,7 @@ pub async fn status(cx: Context<'_>) -> Result<()> {
     💻 Uso de memoria por subprocessos: `{:.1} MiB`
     "#,
         env!("CARGO_PKG_VERSION"),
-        relative_since(cx.data().uptime.elapsed().as_secs()),
+        relative_since(ctx.data().uptime.elapsed().as_secs()),
         system.name().unwrap_or_default(),
         system.kernel_version().unwrap_or_default(),
         used / (1024 * 1024),
@@ -38,7 +38,7 @@ pub async fn status(cx: Context<'_>) -> Result<()> {
     .trim_start()
     .to_string();
 
-    cx.send(|m| {
+    ctx.send(|m| {
         m.embed(|e| {
             e.title("Minhas informações")
                 .colour(Colour::BLURPLE)
