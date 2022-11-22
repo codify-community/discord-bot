@@ -1,5 +1,5 @@
 use crate::primitives::{AutoRole, Context, REGISTRO_ROLE_MARKER};
-use anyhow::{Context as _, Result};
+use anyhow::{bail, Context as _, Result};
 use poise::serenity_prelude::{ButtonStyle, CacheHttp, ChannelId, Colour, Mentionable, Role};
 use std::{env, time::Instant};
 
@@ -52,7 +52,7 @@ pub async fn registro_add_category(
             m.embed(|e| {
                 e.title(&nome)
                     .image(imagem)
-                    .colour(Colour::FOOYOO)
+                    .colour(Colour::BLURPLE)
                     .description(descricao)
             })
             .components(|c| {
@@ -88,7 +88,7 @@ pub async fn registro_add_category(
 #[poise::command(
     prefix_command,
     slash_command,
-    aliases("rar"),
+    aliases("Rar"),
     default_member_permissions = "MANAGE_GUILD"
 )]
 pub async fn registro_add_role(
@@ -111,10 +111,15 @@ pub async fn registro_add_role(
         .await?;
 
     let embed = message.embeds.first_mut().context("Mensagem inválida")?;
+    let description = embed.description.as_ref().context("Mensagem inválida")?;
+
+    if description.contains(&cargo.mention().to_string()) {
+        handle.delete(ctx).await?;
+        bail!(":x: Esse cargo já existe nessa categoria.");
+    }
 
     embed.description = Some(format!(
-        "{}\n{REGISTRO_ROLE_MARKER} {}",
-        embed.description.as_ref().context("Mensagem inválida")?,
+        "{description}\n{REGISTRO_ROLE_MARKER} {}",
         cargo.mention()
     ));
 
@@ -163,13 +168,15 @@ pub async fn registro_remove_role(
         .context("Mensagem inválida")?
         .clone();
 
-    let description = embed
-        .description
-        .as_ref()
-        .context("Invalid message")?
-        .replace(&format!("\n{REGISTRO_ROLE_MARKER} {}", cargo.mention()), "");
+    let description = embed.description.as_ref().context("Invalid message")?;
 
-    embed.description = Some(description);
+    if !description.contains(&cargo.mention().to_string()) {
+        handle.delete(ctx).await?;
+        bail!(":x: Esse cargo não existe na categoria.");
+    }
+
+    embed.description =
+        Some(description.replace(&format!("\n{REGISTRO_ROLE_MARKER} {}", cargo.mention()), ""));
 
     message
         .edit(ctx.http(), |m| m.set_embed(embed.into()))
