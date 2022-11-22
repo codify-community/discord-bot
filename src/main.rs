@@ -1,3 +1,10 @@
+#![warn(clippy::perf, clippy::pedantic)]
+#![allow(
+    clippy::cast_possible_wrap,
+    clippy::cast_sign_loss,
+    clippy::cast_precision_loss
+)]
+
 use crate::{
     commands::{
         admin::{ban::ban, unban::unban},

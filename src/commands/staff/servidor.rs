@@ -14,6 +14,7 @@ use std::{env, time::Instant};
         "registro_remove_category"
     )
 )]
+#[allow(clippy::unused_async)]
 pub async fn servidor(_ctx: Context<'_>) -> Result<()> {
     Ok(())
 }

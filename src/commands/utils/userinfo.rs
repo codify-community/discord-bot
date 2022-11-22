@@ -1,4 +1,4 @@
-use crate::{primitives::Context, utils::time::get_relative_time};
+use crate::{primitives::Context, utils::time::discord_relative_format};
 use anyhow::Result;
 use poise::serenity_prelude as serenity;
 
@@ -50,12 +50,12 @@ pub async fn userinfo(
                 ("💻 **Id de usuário:**", user_id, true),
                 (
                     "📅 **Conta criada há:**",
-                    get_relative_time(account_age as u64),
+                    discord_relative_format(account_age as u64),
                     true,
                 ),
                 (
                     "🌟 **Entrou no servidor há:**",
-                    get_relative_time(joined_at as u64),
+                    discord_relative_format(joined_at as u64),
                     false,
                 ),
                 ("📚 **Cargos:**", roles_str, false),

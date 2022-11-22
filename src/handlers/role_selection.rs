@@ -20,88 +20,38 @@ fn get_roles_from_embed(ctx: &Context, guild_id: u64, embed: &Embed) -> Option<V
     Some(roles)
 }
 
-pub async fn on_interaction_component_create(
+pub async fn resolve_role(
     ctx: &Context,
     component: &MessageComponentInteraction,
-    state: &State,
+    guild_id: u64,
 ) -> anyhow::Result<()> {
-    let guild_id = state.guild_id;
+    component.defer(&ctx.http).await?;
+    tracing::debug!("Received role-resolve event");
 
-    let roles_from_embed =
-        || get_roles_from_embed(ctx, guild_id, component.message.embeds.first()?);
+    let to_add: Vec<RoleId> = component
+        .data
+        .values
+        .iter()
+        .flat_map(|s| s.parse::<u64>())
+        .map(RoleId)
+        .collect();
 
-    match component.data.custom_id.as_str() {
-        "registro-select-roles" => {
-            tracing::debug!(user = ?component.user, "Sending select menu to user.");
+    tracing::info!(user = ?component.user, "Add {to_add:?}");
 
-            let roles = roles_from_embed().context("Failed do get roles from embed")?;
+    let mut member = ctx
+        .http
+        .get_member(guild_id, component.user.id.0)
+        .await
+        .context("Can't find member!")?;
 
-            if roles.is_empty() {
-                component.create_interaction_response(&ctx.http, |m| {
-                                m.interaction_response_data(|d| {
-                                    d.ephemeral(true).content("A direção do servidor ainda não configurou essa seção. Por favor aguarde até que eles configurem. ")
-                                })
-                            }).await?;
+    let member_roles: Vec<RoleId> = member
+        .roles(&ctx.cache)
+        .context("Failed to get roles")?
+        .into_iter()
+        .map(|p| p.id)
+        .collect();
 
-                return Ok(());
-            }
-
-            tracing::trace!("Found {roles:?} in message.");
-
-            component
-                .create_interaction_response(&ctx.http, |m| {
-                    m.interaction_response_data(|d| {
-                        d.ephemeral(true).components(|c| {
-                            c.create_action_row(|row| {
-                                row.create_select_menu(|sm| {
-                                    sm.custom_id("role-resolve")
-                                        .placeholder("Por favor selecione alguma opção")
-                                        .min_values(1)
-                                        .max_values(roles.len() as _)
-                                        .options(|opts| {
-                                            for role in roles {
-                                                opts.create_option(|o| {
-                                                    o.label(role.name).value(role.id)
-                                                });
-                                            }
-
-                                            opts
-                                        })
-                                })
-                            })
-                        })
-                    })
-                })
-                .await?;
-        }
-
-        "role-resolve" => {
-            component.defer(&ctx.http).await?;
-            tracing::debug!("Received role-resolve event");
-            let to_add: Vec<RoleId> = component
-                .data
-                .values
-                .iter()
-                .flat_map(|s| s.parse::<u64>())
-                .map(RoleId)
-                .collect();
-
-            tracing::info!(user = ?component.user, "Add {to_add:?}");
-
-            let mut member = ctx
-                .http
-                .get_member(guild_id, component.user.id.0)
-                .await
-                .context("Can't find member!")?;
-
-            let member_roles: Vec<RoleId> = member
-                .roles(&ctx.cache)
-                .context("Failed to get roles")?
-                .into_iter()
-                .map(|p| p.id)
-                .collect();
-
-            let ActionRowComponent::SelectMenu(ref sm) = component
+    let ActionRowComponent::SelectMenu(ref sm) = component
                 .message
                 .components
                 .first()
@@ -110,42 +60,102 @@ pub async fn on_interaction_component_create(
                     anyhow::bail!("Unexpected component");
                 };
 
-            let roles: Vec<_> = sm
-                .options
-                .iter()
-                .map(|it| it.value.clone())
-                .flat_map(|s| s.parse::<u64>())
-                .filter_map(|rid| ctx.cache.role(guild_id, rid))
-                .map(|p| p.id)
-                .collect();
+    let roles: Vec<_> = sm
+        .options
+        .iter()
+        .map(|it| it.value.clone())
+        .flat_map(|s| s.parse::<u64>())
+        .filter_map(|rid| ctx.cache.role(guild_id, rid))
+        .map(|p| p.id)
+        .collect();
 
-            let to_remove: Vec<_> = roles
-                .iter()
-                .filter(|m| member_roles.contains(m))
-                .copied()
-                .collect();
+    let to_remove: Vec<_> = roles
+        .iter()
+        .filter(|m| member_roles.contains(m))
+        .copied()
+        .collect();
 
-            if !to_remove.is_empty() {
-                tracing::info!("Removing {to_remove:?} roles from {}.", component.user.id);
+    if !to_remove.is_empty() {
+        tracing::info!("Removing {to_remove:?} roles from {}.", component.user.id);
 
-                member.remove_roles(&ctx.http, &to_remove).await?;
-            }
+        member.remove_roles(&ctx.http, &to_remove).await?;
+    }
 
-            if !to_add.is_empty() {
-                tracing::info!("Adding {to_add:?} roles to {}.", component.user.id);
+    if !to_add.is_empty() {
+        tracing::info!("Adding {to_add:?} roles to {}.", component.user.id);
 
-                member.add_roles(&ctx.http, &to_add).await?;
-            }
+        member.add_roles(&ctx.http, &to_add).await?;
+    }
 
-            component
-                    .create_followup_message(&ctx.http, |m| {
+    component
+        .create_followup_message(&ctx.http, |m| {
                         m.ephemeral(true).content(
                             "Prontinho! Caso você queira remover ou adicionar novos cargos é só clicar no `Selecionar Cargos` novamente.",
                         )
                     })
                     .await?;
-        }
+    Ok(())
+}
 
+pub async fn ask_roles(
+    ctx: &Context,
+    component: &MessageComponentInteraction,
+    guild_id: u64,
+) -> anyhow::Result<()> {
+    tracing::debug!(user = ?component.user, "Sending select menu to user.");
+    let roles_from_embed =
+        || get_roles_from_embed(ctx, guild_id, component.message.embeds.first()?);
+
+    let roles = roles_from_embed().context("Failed do get roles from embed")?;
+
+    if roles.is_empty() {
+        component.create_interaction_response(&ctx.http, |m| {
+                                m.interaction_response_data(|d| {
+                                    d.ephemeral(true).content("A direção do servidor ainda não configurou essa seção. Por favor aguarde até que eles configurem. ")
+                                })
+                            }).await?;
+
+        return Ok(());
+    }
+
+    tracing::trace!("Found {roles:?} in message.");
+
+    component
+        .create_interaction_response(&ctx.http, |m| {
+            m.interaction_response_data(|d| {
+                d.ephemeral(true).components(|c| {
+                    c.create_action_row(|row| {
+                        row.create_select_menu(|sm| {
+                            sm.custom_id("role-resolve")
+                                .placeholder("Por favor selecione alguma opção")
+                                .min_values(1)
+                                .max_values(roles.len() as _)
+                                .options(|opts| {
+                                    for role in roles {
+                                        opts.create_option(|o| o.label(role.name).value(role.id));
+                                    }
+
+                                    opts
+                                })
+                        })
+                    })
+                })
+            })
+        })
+        .await?;
+    Ok(())
+}
+
+pub async fn on_interaction_component_create(
+    ctx: &Context,
+    component: &MessageComponentInteraction,
+    state: &State,
+) -> anyhow::Result<()> {
+    let guild_id = state.guild_id;
+
+    match component.data.custom_id.as_str() {
+        "registro-select-roles" => ask_roles(ctx, component, guild_id).await?,
+        "role-resolve" => resolve_role(ctx, component, guild_id).await?,
         _ => {
             tracing::warn!("Event not handled: {}", component.data.custom_id);
         }

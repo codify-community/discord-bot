@@ -10,7 +10,7 @@ pub fn current_total_memory_usage(system: &mut System) -> Option<(u64, u64)> {
     let process = system.process(current_pid)?;
     let mem = process.memory();
 
-    let children_memory_usage: u64 = process.tasks.values().map(|v| v.memory()).sum();
+    let children_memory_usage: u64 = process.tasks.values().map(ProcessExt::memory).sum();
 
     Some((mem, children_memory_usage))
 }
