@@ -27,7 +27,7 @@ pub async fn unban(
     #[autocomplete = "autocomplete_bans"]
     user: UserId,
 ) -> Result<()> {
-    let guild = cx.guild().ok_or(anyhow!("No Guild!"))?;
+    let guild = cx.guild().ok_or_else(|| anyhow!("No Guild!"))?;
     guild.unban(cx, user).await?;
 
     cx.say("Usuário desbanido!").await?;
