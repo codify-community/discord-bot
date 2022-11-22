@@ -1,10 +1,10 @@
-use std::future::ready;
 use crate::primitives::Context;
-use anyhow::{Result, Context as _};
+use anyhow::{Context as _, Result};
 use poise::{
     futures_util::{stream, Stream, StreamExt},
     serenity_prelude::UserId,
 };
+use std::future::ready;
 
 async fn autocomplete_bans<'a>(
     cx: Context<'_>,
