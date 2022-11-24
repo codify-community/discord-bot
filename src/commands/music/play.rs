@@ -4,7 +4,11 @@ use songbird::input::{Input, Metadata};
 use std::process::Command;
 
 #[poise::command(prefix_command, slash_command)]
-pub async fn play(ctx: Context<'_>, song: String) -> Result<()> {
+/// Toca uma música
+pub async fn play(
+    ctx: Context<'_>,
+    #[description = "URL do youtube ou nome"] song: String,
+) -> Result<()> {
     let reply = ctx.say(format!("Trying to play `{}`...", song)).await?;
 
     let json = Command::new("yt-dlp")

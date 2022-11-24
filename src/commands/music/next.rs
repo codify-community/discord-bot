@@ -2,6 +2,7 @@ use crate::primitives::Context;
 use anyhow::{Result, Context as _};
 
 #[poise::command(prefix_command, slash_command)]
+/// Toca a próxima música na fila
 pub async fn next(ctx: Context<'_>) -> Result<()> {
     let client = songbird::get(ctx.serenity_context())
         .await
