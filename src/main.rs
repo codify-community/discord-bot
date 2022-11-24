@@ -10,6 +10,7 @@ use crate::{
         admin::{ban::ban, unban::unban},
         general::ping::ping,
         information::status::status,
+        music::{join::join, leave::leave, play::play, queue::queue, next::next},
         staff::servidor::servidor,
         utils::userinfo::userinfo,
     },
@@ -22,6 +23,7 @@ use poise::{
     serenity_prelude::{CacheHttp, GatewayIntents, GuildId},
     Framework, FrameworkOptions, Prefix, PrefixFrameworkOptions,
 };
+use songbird::SerenityInit;
 
 use crate::primitives::Database;
 use std::{env, fs, path::Path, process, time::Instant};
@@ -65,7 +67,19 @@ async fn main() -> Result<()> {
         .parse()
         .context("Failed to parse $DISCORD_GUILD_ID as a valid integer!")?;
 
-    let commands = vec![ping(), status(), servidor(), userinfo(), ban(), unban()];
+    let commands = vec![
+        ping(),
+        status(),
+        servidor(),
+        userinfo(),
+        ban(),
+        unban(),
+        join(),
+        leave(),
+        play(),
+        queue(),
+        next(),
+    ];
 
     let framework = Framework::builder()
         .token(env::var("DISCORD_TOKEN").context("Failed to read $DISCORD_TOKEN")?)
@@ -97,7 +111,8 @@ async fn main() -> Result<()> {
                     system: RwLock::new(System::new()),
                 })
             })
-        });
+        })
+        .client_settings(|c| c.register_songbird());
 
     framework.run().await?;
 
