@@ -1,5 +1,5 @@
 use crate::primitives::Context;
-use anyhow::{Result, Context as _};
+use anyhow::{Context as _, Result};
 
 #[poise::command(prefix_command, slash_command)]
 /// Toca a próxima música na fila

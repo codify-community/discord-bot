@@ -10,7 +10,7 @@ use crate::{
         admin::{ban::ban, unban::unban},
         general::ping::ping,
         information::status::status,
-        music::{join::join, leave::leave, play::play, queue::queue, next::next},
+        music::{join::join, leave::leave, next::next, play::play, queue::queue},
         staff::servidor::servidor,
         utils::userinfo::userinfo,
     },
@@ -112,7 +112,7 @@ async fn main() -> Result<()> {
                 })
             })
         })
-        .client_settings(|c| c.register_songbird());
+        .client_settings(SerenityInit::register_songbird);
 
     framework.run().await?;
 

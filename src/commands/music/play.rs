@@ -1,6 +1,5 @@
 use crate::primitives::Context;
 use anyhow::{Context as _, Result};
-use songbird::input::{Input, Metadata};
 use std::process::Command;
 
 #[poise::command(prefix_command, slash_command)]
@@ -9,7 +8,7 @@ pub async fn play(
     ctx: Context<'_>,
     #[description = "URL do youtube ou nome"] song: String,
 ) -> Result<()> {
-    let reply = ctx.say(format!("Trying to play `{}`...", song)).await?;
+    let reply = ctx.say(format!("Trying to play `{song}`...")).await?;
 
     let json = Command::new("yt-dlp")
         .args(["--default-search", "ytsearch", &song, "--dump-json"])
@@ -26,8 +25,7 @@ pub async fn play(
         .find(|item| {
             item["format"]
                 .as_str()
-                .map(|str| str.contains("audio only"))
-                .unwrap_or(false)
+                .map_or(false, |str| str.contains("audio only"))
         })
         .context("Couldn't find the video's audio!")?;
 
@@ -47,15 +45,11 @@ pub async fn play(
 
     let mut handler = handler.lock().await;
 
-    let mp4 = songbird::ytdl(&url).await?;
+    let mut input = songbird::ytdl(&url).await?;
 
     let title = json["title"].as_str().unwrap_or(&song);
 
-    let mut input = Input::from(mp4);
-    input.metadata = Box::new(Metadata {
-        title: Some(title.to_owned()),
-        ..Default::default()
-    });
+    input.metadata.title = Some(title.to_string());
 
     handler.enqueue_source(input);
 
