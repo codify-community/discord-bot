@@ -71,7 +71,7 @@ async fn main() -> Result<()> {
         .options(FrameworkOptions {
             commands,
             prefix_options: PrefixFrameworkOptions {
-                prefix: Some("$".into()),
+                prefix: Some(".".into()),
                 additional_prefixes: vec![Prefix::Literal(">>"), Prefix::Literal("$ ")],
                 ..Default::default()
             },
