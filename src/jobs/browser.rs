@@ -37,6 +37,10 @@ impl TypeMapKey for Browser {
 }
 
 impl Browser {
+	/// Creates a new browser instance using geckodriver
+	/// # Errors
+	/// When `$GECKODRIVER_CMDLINE` does not exists.
+	/// Fails to connect to `$GECKODRIVER_ADDRESS`
     pub async fn new() -> Result<(Tx, Self), Error> {
         let cmdline = var("GECKODRIVER_CMDLINE")?;
         let mut args = cmdline.split_whitespace();
