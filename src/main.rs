@@ -22,13 +22,14 @@ use poise::{
     serenity_prelude::{CacheHttp, GatewayIntents, GuildId},
     Framework, FrameworkOptions, Prefix, PrefixFrameworkOptions,
 };
+use tracing_subscriber::EnvFilter;
 
 use crate::primitives::Database;
+use handlers::on_error::on_error;
 use std::{env, fs, path::Path, process, time::Instant};
 use sysinfo::{System, SystemExt};
 use tokio::sync::RwLock;
 use tracing::log::info;
-use tracing_subscriber::EnvFilter;
 
 mod commands;
 mod event_handler;
@@ -77,6 +78,7 @@ async fn main() -> Result<()> {
                 additional_prefixes: vec![Prefix::Literal(">>"), Prefix::Literal("$ ")],
                 ..Default::default()
             },
+            on_error: |e| Box::pin(on_error(e)),
             event_handler: |ctx, event, _fw, state| {
                 Box::pin(event_handler::handle_event(ctx, event, state))
             },
