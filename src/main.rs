@@ -11,8 +11,9 @@ use crate::{
         general::ping::ping,
         information::status::status,
         staff::servidor::servidor,
-        utils::userinfo::userinfo,
+        utils::{userinfo::userinfo, web::web},
     },
+    jobs::{browser::Browser, Job},
     primitives::State,
     utils::validations,
 };
@@ -24,6 +25,7 @@ use poise::{
     Framework, FrameworkOptions, Prefix, PrefixFrameworkOptions,
 };
 use tracing_subscriber::EnvFilter;
+use typemap_rev::TypeMap;
 
 use crate::primitives::Database;
 use handlers::on_error::on_error;
@@ -35,6 +37,7 @@ use tracing::log::info;
 mod commands;
 mod event_handler;
 mod handlers;
+pub mod jobs;
 mod primitives;
 mod utils;
 
@@ -52,7 +55,15 @@ async fn main() -> Result<()> {
     info!("Starting bot...");
     let guild_id: u64 = env::var("GUILD_ID")?.parse()?;
 
-    let commands = vec![ping(), status(), servidor(), userinfo(), ban(), unban()];
+    let commands = vec![
+        ping(),
+        status(),
+        servidor(),
+        userinfo(),
+        ban(),
+        unban(),
+        web(),
+    ];
 
     let framework = Framework::builder()
         .token(env::var("DISCORD_TOKEN")?)
@@ -73,15 +84,19 @@ async fn main() -> Result<()> {
         .setup(move |ctx, _, f| {
             Box::pin(async move {
                 register_in_guild(&ctx.http(), &f.options().commands, GuildId(guild_id)).await?;
+                let mut jobs = TypeMap::new();
+                let (tx, browser) = Browser::new().await?;
+                jobs.insert::<Browser>(tx);
+                tokio::spawn(async move {
+                    browser.start().await.expect("Brower job failed");
+                });
 
                 Ok(State {
                     guild_id,
-                    database: Database::init_from_directory(
-                        &env::var("DATABASE_LOCATION")
-                            .context("Failed to read $DATABASE_LOCATION")?,
-                    )
-                    .await?,
+                    database: Database::init_from_directory(&env::var("DATABASE_LOCATION")?)
+                        .await?,
                     uptime: Instant::now(),
+                    jobs,
                     system: RwLock::new(System::new()),
                 })
             })
