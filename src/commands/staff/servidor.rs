@@ -34,10 +34,7 @@ pub async fn registro_add_category(
 ) -> Result<()> {
     let started = Instant::now();
     let handle = ctx.say(":stopwatch:").await?;
-    let registro_id = env::var("CODIFY_REGISTRO_ID")
-        .context("Can't get $CODIFY_REGISTRO_ID")?
-        .parse()
-        .context("Invalid Registro ID!")?;
+    let registro_id = env::var("CODIFY_REGISTRO_ID")?.parse()?;
 
     let Some(channel)  = ctx.guild()
         .unwrap()
