@@ -16,5 +16,7 @@ pub async fn next(ctx: Context<'_>) -> Result<()> {
 
     handler.queue().skip()?;
 
+    ctx.say("Ok!").await?;
+
     Ok(())
 }

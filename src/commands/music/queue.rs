@@ -1,5 +1,6 @@
 use crate::primitives::Context;
 use anyhow::{Context as _, Result};
+use poise::serenity_prelude::Colour;
 
 #[poise::command(prefix_command, slash_command)]
 /// Mostra a fila de reprodução
@@ -23,7 +24,10 @@ pub async fn queue(ctx: Context<'_>) -> Result<()> {
                 content.push_str(format!("{index} - {title}\n").as_ref());
             }
 
-            embed.title("Queue").description(content)
+            embed
+                .title("Fila de reprodução")
+                .description(content)
+                .colour(Colour::DARK_PURPLE)
         })
     })
     .await?;

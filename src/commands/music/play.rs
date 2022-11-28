@@ -8,7 +8,7 @@ pub async fn play(
     ctx: Context<'_>,
     #[description = "URL do youtube ou nome"] song: String,
 ) -> Result<()> {
-    let reply = ctx.say(format!("Trying to play `{song}`...")).await?;
+    let reply = ctx.say(format!("Tentando tocar `{song}`...")).await?;
 
     let json = Command::new("yt-dlp")
         .args(["--default-search", "ytsearch", &song, "--dump-json"])
@@ -54,12 +54,7 @@ pub async fn play(
     handler.enqueue_source(input);
 
     reply
-        .edit(ctx, |e| {
-            e.content(format!(
-                "Playing `{}`",
-                json["title"].as_str().unwrap_or(&song)
-            ))
-        })
+        .edit(ctx, |e| e.content(format!("Tocando `{title}`")))
         .await?;
 
     Ok(())

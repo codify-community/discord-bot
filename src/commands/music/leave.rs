@@ -8,7 +8,7 @@ pub async fn leave(ctx: Context<'_>) -> Result<()> {
     let guild = ctx.guild().context("No Guild!")?;
 
     let ts = Instant::now();
-    let handler = ctx.say("Leaving...").await?;
+    let handler = ctx.say("Saindo...").await?;
 
     let client = songbird::get(ctx.serenity_context())
         .await
@@ -18,7 +18,7 @@ pub async fn leave(ctx: Context<'_>) -> Result<()> {
 
     handler
         .edit(ctx, |e| {
-            e.content(format!("Leaved in `{:.2?}`", ts.elapsed()))
+            e.content(format!("Saiu em `{:.2?}`", ts.elapsed()))
         })
         .await?;
 

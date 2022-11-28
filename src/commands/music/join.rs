@@ -8,7 +8,7 @@ pub async fn join(ctx: Context<'_>) -> Result<()> {
     let guild = ctx.guild().context("No Guild!")?;
 
     let ts = Instant::now();
-    let handler = ctx.say("Joining...").await?;
+    let handler = ctx.say("Entrando...").await?;
 
     let channel = guild
         .voice_states
@@ -24,7 +24,7 @@ pub async fn join(ctx: Context<'_>) -> Result<()> {
 
     handler
         .edit(ctx, |e| {
-            e.content(format!("Joined in `{:.2?}`", ts.elapsed()))
+            e.content(format!("Entrou em `{:.2?}`", ts.elapsed()))
         })
         .await?;
 
