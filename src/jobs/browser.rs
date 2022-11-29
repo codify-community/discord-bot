@@ -8,7 +8,6 @@ use tokio::{
     time::Instant,
 };
 use typemap_rev::TypeMapKey;
-use urlencoding::encode;
 
 type Message = Vec<u8>;
 type Sender = oneshot::Sender<Message>;
@@ -76,7 +75,7 @@ impl Job for Browser {
                     tracing::info!("Searching {query}...");
                     let uri = format!(
                         "https://www.google.com/search?client=firefox-b-d&q={}",
-                        encode(&query)
+                        &query
                     );
 
                     let screenshot = browser
