@@ -2,7 +2,7 @@ use crate::primitives::Context;
 use anyhow::Result;
 use poise::serenity_prelude::{Colour, Mentionable, Message};
 
-fn description(mention: String) -> String {
+fn description(mention: &str) -> String {
     format! {
         r#"Olá {mention}! Me desculpe incomodar, mas você **não precisa perguntar para perguntar**.
 
@@ -20,7 +20,7 @@ pub async fn nppp(ctx: Context<'_>, message: Message) -> Result<()> {
         .send_message(ctx, |m| {
             m.reference_message(&message).embed(|e| {
                 e.colour(Colour::TEAL)
-                    .description(description(message.author.mention().to_string()))
+                    .description(description(&message.author.mention().to_string()))
                     .fields([(
                         "Titulo",
                         "Como resolver `Cannot find type definition file for 'node'`",
