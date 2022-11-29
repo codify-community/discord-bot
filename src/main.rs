@@ -11,7 +11,7 @@ use crate::{
         general::ping::ping,
         information::status::status,
         staff::servidor::servidor,
-        utils::{userinfo::userinfo, web::web},
+        utils::{nppp::nppp, userinfo::userinfo, web::web},
     },
     jobs::{browser::Browser, Job},
     primitives::State,
@@ -63,6 +63,7 @@ async fn main() -> Result<()> {
         ban(),
         unban(),
         web(),
+        nppp(),
     ];
 
     let framework = Framework::builder()
