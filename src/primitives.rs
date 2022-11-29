@@ -20,7 +20,6 @@ pub struct Database {
 }
 
 impl Database {
-    #[tracing::instrument]
     pub async fn init_from_directory(directory: &str) -> anyhow::Result<Self> {
         if !Path::new(directory).exists() {
             debug!("Target directory doesn't exists. So creating it.");
@@ -29,9 +28,9 @@ impl Database {
                 .context("Failed to create directory for database")?;
         }
 
-        info!("Loading autoRulesMessages.ron");
+        info!("Loading role_selection.ron");
         let auto_rules_messages =
-            FileDatabase::load_from_path_or_default(format!("{directory}/autoRulesMessages.ron"))
+            FileDatabase::load_from_path_or_default(format!("{directory}/role_selection.ron"))
                 .context("Failed to open user store file")?;
 
         Ok(Self {
