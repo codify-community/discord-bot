@@ -18,12 +18,22 @@ pub async fn nppp(ctx: Context<'_>, message: Message) -> Result<()> {
             m.reference_message(&message).embed(|e| {
                 e.colour(Colour::TEAL)
                     .description(description(&message.author.mention().to_string()))
-                    .fields([(
-                        "Titulo",
-                        "Como resolver `Cannot find type definition file for 'node'`",
-                        true,
-                    ), ("Tags", "Typescript", true), ("Corpo", "Olá gente! eu to com esse probleminha faz algum tempo. É o seguinte, quando eu tento usar `process.exit(0)`, dá esse erro do titulo.
-Alguém sabe resolver?", false)])
+                    .fields([
+                        (
+                            "Titulo",
+                            "Como resolver `Cannot find type definition file for 'node'`",
+                            true,
+                        ),
+                        ("Tags", "Typescript", true),
+                        (
+                            "Corpo",
+                            "Olá gente! eu to com esse probleminha faz algum tempo. \
+                                   É o seguinte, quando eu tento usar `process.exit(0)`, \
+                                   dá esse erro do titulo.\n\
+                                   Alguém sabe resolver?",
+                            false,
+                        ),
+                    ])
             })
         })
         .await?;
