@@ -3,15 +3,12 @@ use anyhow::Result;
 use poise::serenity_prelude::{Colour, Mentionable, Message};
 
 fn description(mention: &str) -> String {
-    format! {
-        r#"Olá {mention}! Me desculpe incomodar, mas você **não precisa perguntar para perguntar**.
-
-        - Ué, como assim?
-        Simples, você pode mandar a pergunta direto, no lugar de "Alguém sabe Node.JS?", você pode mandar no canal de pergunta adequado
-        "#
-    }
-    .trim()
-    .to_string()
+    format!(
+        "Olá {mention}! Me desculpe incomodar, mas você **não precisa perguntar para perguntar**.\n\n\
+        - Ué, como assim?\n\
+        Simples, você pode mandar a pergunta direto, no lugar de \"Alguém sabe Node.JS?\", \
+        você pode mandar no canal de pergunta adequado\n"
+    )
 }
 
 #[poise::command(context_menu_command = "Enviar NPPP", prefix_command)]
