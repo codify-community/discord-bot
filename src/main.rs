@@ -12,8 +12,9 @@ use crate::{
         information::status::status,
         music::{join::join, leave::leave, next::next, np::np, play::play, queue::queue},
         staff::servidor::servidor,
-        utils::userinfo::userinfo,
+        utils::{nppp::nppp, userinfo::userinfo, web::web},
     },
+    jobs::{browser::Browser, Job},
     primitives::State,
     utils::validations,
 };
@@ -27,6 +28,7 @@ use poise::{
 
 use songbird::SerenityInit;
 use tracing_subscriber::EnvFilter;
+use typemap_rev::TypeMap;
 
 use crate::primitives::Database;
 use handlers::on_error::on_error;
@@ -38,6 +40,7 @@ use tracing::log::info;
 mod commands;
 mod event_handler;
 mod handlers;
+pub mod jobs;
 mod primitives;
 mod utils;
 
@@ -68,6 +71,8 @@ async fn main() -> Result<()> {
         queue(),
         next(),
         np(),
+        web(),
+        nppp(),
     ];
 
     let framework = Framework::builder()
@@ -76,7 +81,7 @@ async fn main() -> Result<()> {
         .options(FrameworkOptions {
             commands,
             prefix_options: PrefixFrameworkOptions {
-                prefix: Some("$".into()),
+                prefix: Some(".".into()),
                 additional_prefixes: vec![Prefix::Literal(">>"), Prefix::Literal("$ ")],
                 ..Default::default()
             },
@@ -89,15 +94,19 @@ async fn main() -> Result<()> {
         .setup(move |ctx, _, f| {
             Box::pin(async move {
                 register_in_guild(&ctx.http(), &f.options().commands, GuildId(guild_id)).await?;
+                let mut jobs = TypeMap::new();
+                let (tx, browser) = Browser::new().await?;
+                jobs.insert::<Browser>(tx);
+                tokio::spawn(async move {
+                    browser.start().await.expect("Brower job failed");
+                });
 
                 Ok(State {
                     guild_id,
-                    database: Database::init_from_directory(
-                        &env::var("DATABASE_LOCATION")
-                            .context("Failed to read $DATABASE_LOCATION")?,
-                    )
-                    .await?,
+                    database: Database::init_from_directory(&env::var("DATABASE_LOCATION")?)
+                        .await?,
                     uptime: Instant::now(),
+                    jobs,
                     system: RwLock::new(System::new()),
                 })
             })
