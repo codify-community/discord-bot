@@ -1,5 +1,4 @@
 use anyhow::Context;
-use poise::serenity_prelude::validate_token;
 use std::{env::var, path::Path};
 
 pub fn env() -> anyhow::Result<()> {
@@ -11,12 +10,12 @@ pub fn env() -> anyhow::Result<()> {
         })
     };
 
-    validate_token(evar("DISCORD_TOKEN")?)?;
+    evar("DISCORD_TOKEN")?;
+    evar("GECKODRIVER_ADDRESS")?;
+    evar("GECKODRIVER_CMDLINE")?;
 
     try_id("REGISTRO_ID")?;
     try_id("LOG_CHANNEL_ID")?;
-
-    println!("{}", evar("DATABASE_LOCATION")?);
 
     if !evar("DATABASE_LOCATION").map(|x| Path::new(&(x + "/")).exists())? {
         anyhow::bail!("Invalid database location");
