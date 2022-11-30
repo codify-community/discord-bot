@@ -1,5 +1,6 @@
 use crate::primitives::Context;
 use anyhow::{Context as _, Result};
+use songbird::input::Metadata;
 use std::process::Command;
 
 #[poise::command(prefix_command, slash_command)]
@@ -18,20 +19,9 @@ pub async fn play(
     let json = String::from_utf8(json)?;
     let json: serde_json::Value = serde_json::from_str(&json)?;
 
-    let video_json = json["formats"]
-        .as_array()
-        .into_iter()
-        .flatten()
-        .find(|item| {
-            item["format"]
-                .as_str()
-                .map_or(false, |str| str.contains("audio only"))
-        })
-        .context("Couldn't find the video's audio!")?;
-
-    let url = video_json["url"]
-        .as_str()
-        .context("Couldn't find video url!")?;
+    let metadata = Metadata::from_ytdl_output(json);
+    let url = metadata.source_url.clone().context("No URL!")?;
+    let title = metadata.title.clone().context("No title!")?;
 
     let guild = ctx.guild().context("No Guild!")?;
 
@@ -45,11 +35,8 @@ pub async fn play(
 
     let mut handler = handler.lock().await;
 
-    let mut input = songbird::ytdl(&url).await?;
-
-    let title = json["title"].as_str().unwrap_or(&song);
-
-    input.metadata.title = Some(title.to_string());
+    let mut input = songbird::ytdl(url).await?;
+    *input.metadata = metadata;
 
     handler.enqueue_source(input);
 

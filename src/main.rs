@@ -10,7 +10,7 @@ use crate::{
         admin::{ban::ban, unban::unban},
         general::ping::ping,
         information::status::status,
-        music::{join::join, leave::leave, next::next, play::play, queue::queue},
+        music::{join::join, leave::leave, next::next, np::np, play::play, queue::queue},
         staff::servidor::servidor,
         utils::userinfo::userinfo,
     },
@@ -67,6 +67,7 @@ async fn main() -> Result<()> {
         play(),
         queue(),
         next(),
+        np(),
     ];
 
     let framework = Framework::builder()
