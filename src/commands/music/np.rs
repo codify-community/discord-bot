@@ -21,7 +21,7 @@ pub async fn np(ctx: Context<'_>) -> Result<()> {
     let metadata = current.metadata();
 
     let play_time = current.get_info().await?.play_time;
-    let duration = metadata.duration.as_ref().unwrap();
+    let duration = metadata.duration.unwrap();
     let playing = metadata.source_url.as_ref().unwrap();
     let thumb = metadata.thumbnail.as_ref().unwrap();
     let title = metadata.title.as_ref().unwrap();
@@ -33,8 +33,23 @@ pub async fn np(ctx: Context<'_>) -> Result<()> {
                 .url(playing)
                 .image(thumb)
                 .color(Color::RED)
-                .footer(|footer| {
-                    footer.text(format!("⏱️ Tempo restante: {:.0?}", *duration - play_time))
+                .footer(|f| {
+                    let remaining = (duration - play_time).as_secs();
+                    let (minutes, seconds) = (remaining / 60, remaining % 60);
+
+                    let minutes_string = match minutes {
+                        0 => String::new(),
+                        1 => "1 minuto".into(),
+                        t => format!("{t} minutos"),
+                    };
+
+                    let seconds_string = match seconds {
+                        0 => String::new(),
+                        1 => "e 1 segundo".into(),
+                        t => format!("e {t} segundos"),
+                    };
+
+                    f.text(format!("⏱️ Tempo restante: {minutes_string} {seconds_string}"))
                 })
         })
     })

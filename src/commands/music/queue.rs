@@ -18,16 +18,21 @@ pub async fn queue(ctx: Context<'_>) -> Result<()> {
     ctx.send(|message| {
         message.embed(|embed| {
             let mut content = String::new();
+            let queue = handler.queue().current_queue();
 
-            for (index, video) in handler.queue().current_queue().iter().enumerate() {
+            for (index, video) in queue.iter().enumerate() {
                 let title = video.metadata().title.as_ref().unwrap();
                 content.push_str(format!("{index} - {title}\n").as_ref());
             }
 
-            embed
-                .title("Fila de reprodução")
-                .description(content)
-                .colour(Colour::DARK_PURPLE)
+            if queue.is_empty() {
+                embed.title("Fila de reprodução vazia")
+            } else {
+                embed
+                    .title("Fila de reprodução")
+                    .description(content)
+                    .colour(Colour::DARK_PURPLE)
+            }
         })
     })
     .await?;
