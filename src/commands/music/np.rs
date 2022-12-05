@@ -49,7 +49,9 @@ pub async fn np(ctx: Context<'_>) -> Result<()> {
                         t => format!("e {t} segundos"),
                     };
 
-                    f.text(format!("⏱️ Tempo restante: {minutes_string} {seconds_string}"))
+                    f.text(format!(
+                        "⏱️ Tempo restante: {minutes_string} {seconds_string}"
+                    ))
                 })
         })
     })
