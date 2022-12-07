@@ -12,7 +12,6 @@ pub fn env() -> anyhow::Result<()> {
 
     evar("DISCORD_TOKEN")?;
     evar("GECKODRIVER_ADDRESS")?;
-    evar("GECKODRIVER_CMDLINE")?;
 
     try_id("REGISTRO_ID")?;
     try_id("LOG_CHANNEL_ID")?;

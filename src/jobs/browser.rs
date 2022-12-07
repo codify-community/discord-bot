@@ -3,7 +3,6 @@ use anyhow::{Context, Error};
 use std::env::var;
 use thirtyfour::{DesiredCapabilities, WebDriver};
 use tokio::{
-    process::Command,
     sync::{mpsc, oneshot},
     time::Instant,
 };
@@ -38,16 +37,8 @@ impl TypeMapKey for Browser {
 impl Browser {
     /// Creates a new browser instance using geckodriver
     /// # Errors
-    /// When `$GECKODRIVER_CMDLINE` does not exists.
-    /// Fails to connect to `$GECKODRIVER_ADDRESS`
+    /// When Fails to connect to `$GECKODRIVER_ADDRESS`
     pub async fn new() -> Result<(Tx, Self), Error> {
-        let cmdline = var("GECKODRIVER_CMDLINE")?;
-        let mut args = cmdline.split_whitespace();
-
-        Command::new(args.next().context("No executable name")?)
-            .args(args)
-            .spawn()?;
-
         let (tx, rx) = mpsc::unbounded_channel();
         let mut caps = DesiredCapabilities::firefox();
         caps.set_headless()?;
