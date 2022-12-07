@@ -10,8 +10,9 @@ use crate::{
         admin::{ban::ban, unban::unban},
         general::ping::ping,
         information::status::status,
+        music::{join::join, leave::leave, next::next, np::np, play::play, queue::queue},
         staff::servidor::servidor,
-        utils::{userinfo::userinfo, web::web},
+        utils::{nppp::nppp, userinfo::userinfo, web::web},
     },
     jobs::{browser::Browser, Job},
     primitives::State,
@@ -24,6 +25,8 @@ use poise::{
     serenity_prelude::{CacheHttp, GatewayIntents, GuildId},
     Framework, FrameworkOptions, Prefix, PrefixFrameworkOptions,
 };
+
+use songbird::SerenityInit;
 use tracing_subscriber::EnvFilter;
 use typemap_rev::TypeMap;
 
@@ -62,7 +65,14 @@ async fn main() -> Result<()> {
         userinfo(),
         ban(),
         unban(),
+        join(),
+        leave(),
+        play(),
+        queue(),
+        next(),
+        np(),
         web(),
+        nppp(),
     ];
 
     let framework = Framework::builder()
@@ -100,7 +110,8 @@ async fn main() -> Result<()> {
                     system: RwLock::new(System::new()),
                 })
             })
-        });
+        })
+        .client_settings(SerenityInit::register_songbird);
 
     framework.run().await?;
 
