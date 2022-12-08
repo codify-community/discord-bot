@@ -1,7 +1,5 @@
 use crate::primitives::Context;
 use anyhow::{Context as _, Result};
-use songbird::input::Metadata;
-use std::process::Command;
 
 #[poise::command(prefix_command, slash_command)]
 /// Toca uma música
@@ -10,20 +8,12 @@ pub async fn play(
     #[description = "URL do youtube ou nome"] song: String,
 ) -> Result<()> {
     let reply = ctx.say(format!("Tentando tocar `{song}`...")).await?;
-
-    let json = Command::new("yt-dlp")
-        .args(["--default-search", "ytsearch", &song, "--dump-json"])
-        .output()?
-        .stdout;
-
-    let json = String::from_utf8(json)?;
-    let json: serde_json::Value = serde_json::from_str(&json)?;
-
-    let metadata = Metadata::from_ytdl_output(json);
-    let url = metadata.source_url.clone().context("No URL!")?;
-    let title = metadata.title.clone().context("No title!")?;
-
     let guild = ctx.guild().context("No Guild!")?;
+    let mut query = song;
+
+    if !query.starts_with("http") {
+        query = format!("ytsearch:{query}");
+    }
 
     let client = songbird::get(ctx.serenity_context())
         .await
@@ -35,8 +25,8 @@ pub async fn play(
 
     let mut handler = handler.lock().await;
 
-    let mut input = songbird::ytdl(url).await?;
-    *input.metadata = metadata;
+    let input = songbird::ytdl(query).await?;
+    let title = input.metadata.title.clone().unwrap_or_default();
 
     handler.enqueue_source(input);
 

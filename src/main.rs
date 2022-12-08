@@ -78,11 +78,11 @@ async fn main() -> Result<()> {
         nppp(),
     ];
 
-    #[cfg(not(debug_assertions))]
-    let prefixes = vec![];
-
     #[cfg(debug_assertions)]
     let prefixes = vec![Prefix::Literal(">>")];
+
+    #[cfg(not(debug_assertions))]
+    let prefixes = vec![];
 
     let framework = Framework::builder()
         .token(env::var("DISCORD_TOKEN")?)
