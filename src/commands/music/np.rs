@@ -3,7 +3,7 @@ use std::time::Duration;
 use crate::{
     common::messages::{CANT_FIND_GUILD, CANT_START_SONGBIRD, IM_NOT_IN_A_VOICE_CHANNEL},
     primitives::Context,
-    utils::time::HumanTime,
+    utils::time::Humanize,
 };
 use anyhow::{Context as _, Result};
 use poise::serenity_prelude::Color;
@@ -52,7 +52,7 @@ pub async fn tocando(ctx: Context<'_>) -> Result<()> {
                         metadata
                             .artist
                             .clone()
-                            .or(metadata.channel.clone())
+                            .or_else(|| metadata.channel.clone())
                             .unwrap_or_default(),
                     )
                 })
@@ -61,8 +61,8 @@ pub async fn tocando(ctx: Context<'_>) -> Result<()> {
 
                     f.text(format!(
                         "⏱️ Tempo restante: {} / {}",
-                        HumanTime(Duration::from_secs(remaining)),
-                        HumanTime(metadata.duration.unwrap())
+                        Humanize(Duration::from_secs(remaining)),
+                        Humanize(metadata.duration.unwrap())
                     ))
                 })
         })

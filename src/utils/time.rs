@@ -28,9 +28,9 @@ pub fn format_dhms(sec: u64) -> (u64, u8, u8, u8) {
     (days, hours, mins, sec)
 }
 
-pub struct HumanTime(pub Duration);
+pub struct Humanize(pub Duration);
 
-impl fmt::Display for HumanTime {
+impl fmt::Display for Humanize {
     #[allow(clippy::many_single_char_names)]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         const SECS_PER_YEAR: u64 = 60 * 60 * 24 * 365;
