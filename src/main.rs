@@ -40,6 +40,7 @@ use tokio::sync::RwLock;
 use tracing::log::info;
 
 mod commands;
+mod common;
 mod event_handler;
 mod handlers;
 pub mod jobs;

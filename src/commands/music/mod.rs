@@ -17,7 +17,8 @@ use anyhow::Result;
         "join::entrar",
         "leave::sair",
         "queue::fila",
-        "np::tocando"
+        "np::tocando",
+        "next::proximo"
     )
 )]
 #[allow(clippy::unused_async)]

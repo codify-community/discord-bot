@@ -1,4 +1,7 @@
-use crate::primitives::Context;
+use crate::{
+    common::messages::{CANT_START_SONGBIRD, IM_NOT_IN_A_VOICE_CHANNEL},
+    primitives::Context,
+};
 use anyhow::{Context as _, Result};
 
 #[poise::command(prefix_command, slash_command, aliases("play"))]
@@ -17,11 +20,9 @@ pub async fn tocar(
 
     let client = songbird::get(ctx.serenity_context())
         .await
-        .context("Couldn't start songbird client")?;
+        .context(CANT_START_SONGBIRD)?;
 
-    let handler = client
-        .get(guild.id)
-        .context("Ei! Você precisa estar em um canal de voz para eu poder entrar, você pode entrar em um por favor?")?;
+    let handler = client.get(guild.id).context(IM_NOT_IN_A_VOICE_CHANNEL)?;
 
     let mut handler = handler.lock().await;
 

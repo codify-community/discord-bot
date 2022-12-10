@@ -1,23 +1,23 @@
 use std::time::Duration;
 
-use crate::{primitives::Context, utils::time::HumanTime};
+use crate::{
+    common::messages::{CANT_FIND_GUILD, CANT_START_SONGBIRD, IM_NOT_IN_A_VOICE_CHANNEL},
+    primitives::Context,
+    utils::time::HumanTime,
+};
 use anyhow::{Context as _, Result};
 use poise::serenity_prelude::Color;
 
 #[poise::command(prefix_command, slash_command, guild_only, aliases("np"))]
 /// 「Música」Informa a música está tocando agora
 pub async fn tocando(ctx: Context<'_>) -> Result<()> {
-    let guild = ctx
-        .guild()
-        .context("Whoar! Não estou em uma guilda. Esse comando só funciona em uma guidla :>")?;
+    let guild = ctx.guild().context(CANT_FIND_GUILD)?;
 
     let client = songbird::get(ctx.serenity_context())
         .await
-        .context("Couldn't start songbird client")?;
+        .context(CANT_START_SONGBIRD)?;
 
-    let handler = client
-        .get(guild.id)
-        .context("Yo, Não estou em um canal de voz. Eu estou tocando algo?")?;
+    let handler = client.get(guild.id).context(IM_NOT_IN_A_VOICE_CHANNEL)?;
     let handler = handler.lock().await;
 
     let queue = handler.queue().current_queue();
@@ -36,7 +36,7 @@ pub async fn tocando(ctx: Context<'_>) -> Result<()> {
     "#,
         handler
             .current_channel()
-            .context("Estranho, parece que não estou em um canal de voz")?,
+            .context(IM_NOT_IN_A_VOICE_CHANNEL)?,
     );
 
     ctx.send(|msg| {
