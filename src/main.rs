@@ -35,7 +35,7 @@ use typemap_rev::TypeMap;
 
 use crate::primitives::Database;
 use handlers::on_error::on_error;
-use std::{env, time::Instant};
+use std::{env, process, time::Instant};
 use sysinfo::{System, SystemExt};
 use tokio::sync::RwLock;
 use tracing::log::info;
@@ -106,8 +106,12 @@ async fn main() -> Result<()> {
                 let mut jobs = TypeMap::new();
                 let (tx, browser) = Browser::new().await?;
                 jobs.insert::<Browser>(tx);
+
                 tokio::spawn(async move {
-                    browser.start().await.expect("Brower job failed");
+                    if let Err(e) = browser.start().await {
+                        tracing::error!("Failed to start geckodriver: {e}");
+                        process::abort();
+                    }
                 });
 
                 Ok(State {

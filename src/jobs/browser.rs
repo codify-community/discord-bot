@@ -1,5 +1,5 @@
 use super::Job;
-use anyhow::{Context, Error};
+use anyhow::{bail, Context, Error};
 use std::env::var;
 use thirtyfour::{DesiredCapabilities, WebDriver};
 use tokio::{
@@ -89,6 +89,6 @@ impl Job for Browser {
             }
         }
 
-        Ok(())
+        bail!("Geckodriver closed")
     }
 }
