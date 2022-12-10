@@ -1,6 +1,6 @@
 use crate::{
     primitives::Context,
-    utils::{process::current_total_memory_usage, time::relative_since},
+    utils::{process::me, time::relative_since},
 };
 use anyhow::Result;
 use poise::serenity_prelude::Colour;
@@ -14,8 +14,7 @@ pub const BUILT_AS: &str = "Release (Production)";
 /// 「FERRAMENTAS」 Veja minhas informações
 #[poise::command(prefix_command, slash_command)]
 pub async fn status(ctx: Context<'_>) -> Result<()> {
-    let (used, used_by_children) =
-        current_total_memory_usage(&mut *ctx.data().system.write().await).unwrap_or((0, 0));
+    let (cpu_usage, memory_usage) = me(&mut *ctx.data().system.write().await).unwrap();
 
     let system = ctx.data().system.read().await;
 
@@ -25,15 +24,15 @@ pub async fn status(ctx: Context<'_>) -> Result<()> {
     💻 Uptime: {}
     💻 Ambiente: `{BUILT_AS}`
     💻 Sistema: `{} v{}`
+    💻 Uso de CPU: `{:.2}%`
     💻 Uso de memoria: `{} MiB`
-    💻 Uso de memoria por subprocessos: `{:.1} MiB`
-    "#,
+       "#,
         env!("CARGO_PKG_VERSION"),
         relative_since(ctx.data().uptime.elapsed().as_secs()),
         system.name().unwrap_or_default(),
         system.kernel_version().unwrap_or_default(),
-        used / (1024 * 1024),
-        used_by_children as f64 / (1024.0 * 1024.0),
+        cpu_usage,
+        memory_usage / (1024 * 1024),
     )
     .trim_start()
     .to_string();
