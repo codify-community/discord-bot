@@ -20,8 +20,8 @@ pub async fn entrar(ctx: Context<'_>) -> Result<()> {
         .context(CANT_START_SONGBIRD)?;
 
     client.join(guild.id, channel).await.1?;
-
-    ctx.say("Pronto :+1:!").await?;
+    ctx.send(|m| m.ephemeral(true).content(":ok_hand: Feito."))
+        .await?;
 
     Ok(())
 }

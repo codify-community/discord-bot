@@ -15,7 +15,8 @@ pub async fn sair(ctx: Context<'_>) -> Result<()> {
 
     if client.get(guild.id).is_some() {
         client.remove(guild.id).await?;
-        ctx.say("Pronto :+1:!").await?;
+        ctx.send(|m| m.ephemeral(true).content(":ok_hand: Feito."))
+            .await?;
     } else {
         bail!(IM_NOT_IN_A_VOICE_CHANNEL)
     }

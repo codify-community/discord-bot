@@ -1,8 +1,9 @@
 use crate::{
-    common::messages::{CANT_START_SONGBIRD, IM_NOT_IN_A_VOICE_CHANNEL},
+    common::messages::{CANT_FIND_GUILD, CANT_START_SONGBIRD, IM_NOT_IN_A_VOICE_CHANNEL},
     primitives::Context,
 };
 use anyhow::{Context as _, Result};
+use songbird::driver::Bitrate;
 
 #[poise::command(prefix_command, slash_command, aliases("play"))]
 /// 「Música」Toca uma música
@@ -10,12 +11,13 @@ pub async fn tocar(
     ctx: Context<'_>,
     #[description = "URL do youtube ou nome"] song: String,
 ) -> Result<()> {
-    let reply = ctx.say(format!("Tentando tocar `{song}`...")).await?;
-    let guild = ctx.guild().context("No Guild!")?;
+    ctx.defer_ephemeral().await?;
+
+    let guild = ctx.guild().context(CANT_FIND_GUILD)?;
     let mut query = song;
 
     if !query.starts_with("http") {
-        query = format!("ytsearch:{query}");
+        query = format!("ytsearch1:{query}");
     }
 
     let client = songbird::get(ctx.serenity_context())
@@ -30,11 +32,12 @@ pub async fn tocar(
     let title = input.metadata.title.clone().unwrap_or_default();
 
     handler.enqueue_source(input);
-    handler.set_bitrate(songbird::driver::Bitrate::Max);
+    handler.set_bitrate(Bitrate::Max);
 
-    reply
-        .edit(ctx, |e| e.content(format!("Tocando `{title}`")))
-        .await?;
-
+    ctx.send(|m| {
+        m.ephemeral(true)
+            .content(format!(":ok_hand: Adicionado `{title}` a fila."))
+    })
+    .await?;
     Ok(())
 }
