@@ -21,7 +21,7 @@ pub async fn play(
 
     let handler = client
         .get(guild.id)
-        .context("Must be in a voice channel to play music!")?;
+        .context("Ei! Você precisa estar em um canal de voz para eu poder entrar, você pode entrar em um por favor?")?;
 
     let mut handler = handler.lock().await;
 
@@ -29,6 +29,7 @@ pub async fn play(
     let title = input.metadata.title.clone().unwrap_or_default();
 
     handler.enqueue_source(input);
+    handler.set_bitrate(songbird::driver::Bitrate::Max);
 
     reply
         .edit(ctx, |e| e.content(format!("Tocando `{title}`")))

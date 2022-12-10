@@ -1,11 +1,15 @@
-use crate::primitives::Context;
+use std::time::Duration;
+
+use crate::{primitives::Context, utils::time::HumanTime};
 use anyhow::{Context as _, Result};
 use poise::serenity_prelude::Color;
 
-#[poise::command(prefix_command, slash_command)]
+#[poise::command(prefix_command, slash_command, guild_only)]
 /// Informa que música está tocando
 pub async fn np(ctx: Context<'_>) -> Result<()> {
-    let guild = ctx.guild().context("No Guild!")?;
+    let guild = ctx
+        .guild()
+        .context("Whoar! Não estou em uma guilda. Esse comando só funciona em uma guidla :>")?;
 
     let client = songbird::get(ctx.serenity_context())
         .await
@@ -13,11 +17,11 @@ pub async fn np(ctx: Context<'_>) -> Result<()> {
 
     let handler = client
         .get(guild.id)
-        .context("Must be in a voice channel to play music!")?;
+        .context("Yo, Não estou em um canal de voz. Eu estou tocando algo?")?;
     let handler = handler.lock().await;
 
     let queue = handler.queue().current_queue();
-    let current = queue.get(0).context("No queue!")?;
+    let current = queue.get(0).context("Não tem nada tocando agora.")?;
     let metadata = current.metadata();
 
     let play_time = current.get_info().await?.play_time;
@@ -26,6 +30,15 @@ pub async fn np(ctx: Context<'_>) -> Result<()> {
     let thumb = metadata.thumbnail.as_ref().unwrap();
     let title = metadata.title.as_ref().unwrap();
 
+    let description = format!(
+        r#"
+    Tocando em: <#{}>
+    "#,
+        handler
+            .current_channel()
+            .context("Estranho, parece que não estou em um canal de voz")?,
+    );
+
     ctx.send(|msg| {
         msg.embed(|embed| {
             embed
@@ -33,24 +46,23 @@ pub async fn np(ctx: Context<'_>) -> Result<()> {
                 .url(playing)
                 .image(thumb)
                 .color(Color::RED)
+                .description(description)
+                .author(|a| {
+                    a.name(
+                        metadata
+                            .artist
+                            .clone()
+                            .or(metadata.channel.clone())
+                            .unwrap_or_default(),
+                    )
+                })
                 .footer(|f| {
                     let remaining = (duration - play_time).as_secs();
-                    let (minutes, seconds) = (remaining / 60, remaining % 60);
-
-                    let minutes_string = match minutes {
-                        0 => String::new(),
-                        1 => "1 minuto".into(),
-                        t => format!("{t} minutos"),
-                    };
-
-                    let seconds_string = match seconds {
-                        0 => String::new(),
-                        1 => "e 1 segundo".into(),
-                        t => format!("e {t} segundos"),
-                    };
 
                     f.text(format!(
-                        "⏱️ Tempo restante: {minutes_string} {seconds_string}"
+                        "⏱️ Tempo restante: {} / {}",
+                        HumanTime(Duration::from_secs(remaining)),
+                        HumanTime(metadata.duration.unwrap())
                     ))
                 })
         })
