@@ -7,11 +7,10 @@
 
 use crate::{
     commands::{
-        admin::{ban::ban, unban::unban},
         general::ping::ping,
         information::status::status,
         music::musica,
-        staff::servidor::servidor,
+        staff::{ban::ban, servidor::servidor, unban::unban},
         utils::{nppp::nppp, userinfo::userinfo, web::web},
     },
     jobs::{browser::Browser, Job},
