@@ -10,7 +10,7 @@ use crate::{
         admin::{ban::ban, unban::unban},
         general::ping::ping,
         information::status::status,
-        music::{join::join, leave::leave, next::next, np::np, play::play, queue::queue},
+        music::musica,
         staff::servidor::servidor,
         utils::{nppp::nppp, userinfo::userinfo, web::web},
     },
@@ -68,12 +68,7 @@ async fn main() -> Result<()> {
         userinfo(),
         ban(),
         unban(),
-        join(),
-        leave(),
-        play(),
-        queue(),
-        next(),
-        np(),
+        musica(),
         web(),
         nppp(),
     ];
@@ -109,7 +104,7 @@ async fn main() -> Result<()> {
 
                 tokio::spawn(async move {
                     if let Err(e) = browser.start().await {
-                        tracing::error!("Failed to start geckodriver: {e}");
+                        tracing::error!("Connection to geckodriver failed because {e}");
                         process::abort();
                     }
                 });

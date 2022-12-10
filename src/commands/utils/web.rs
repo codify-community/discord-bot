@@ -8,7 +8,7 @@ pub async fn web(_ctx: Context<'_>) -> Result<()> {
     Ok(())
 }
 
-/// Procura alguma coisa no google
+/// 「FERRAMENTAS」Procura alguma coisa no google
 #[poise::command(prefix_command, slash_command)]
 pub async fn google(
     ctx: Context<'_>,

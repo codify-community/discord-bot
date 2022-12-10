@@ -1,9 +1,9 @@
 use crate::primitives::Context;
 use anyhow::{Context as _, Result};
 
-#[poise::command(prefix_command, slash_command)]
-/// Toca a próxima música na fila
-pub async fn next(ctx: Context<'_>) -> Result<()> {
+#[poise::command(prefix_command, slash_command, aliases("skip", "next"))]
+/// 「Música」Pula para a proxima música
+pub async fn proximo(ctx: Context<'_>) -> Result<()> {
     let client = songbird::get(ctx.serenity_context())
         .await
         .context("Couldn't start songbird client")?;

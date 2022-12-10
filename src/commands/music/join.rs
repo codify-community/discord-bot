@@ -1,9 +1,9 @@
 use crate::primitives::Context;
 use anyhow::{Context as _, Result};
 
-#[poise::command(prefix_command, slash_command)]
-/// Conecta o bot à o canal que você está conectado
-pub async fn join(ctx: Context<'_>) -> Result<()> {
+#[poise::command(prefix_command, slash_command, aliases("join"))]
+/// 「Música」Conecta o bot à o canal que você está conectado
+pub async fn entrar(ctx: Context<'_>) -> Result<()> {
     let guild = ctx.guild().context("No Guild!")?;
 
     let channel = guild

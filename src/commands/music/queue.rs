@@ -2,9 +2,9 @@ use crate::primitives::Context;
 use anyhow::{Context as _, Result};
 use poise::serenity_prelude::Colour;
 
-#[poise::command(prefix_command, slash_command)]
-/// Mostra a fila de reprodução
-pub async fn queue(ctx: Context<'_>) -> Result<()> {
+#[poise::command(prefix_command, slash_command, aliases("queue"))]
+/// 「Música」Mostra a fila de reprodução
+pub async fn fila(ctx: Context<'_>) -> Result<()> {
     let client = songbird::get(ctx.serenity_context())
         .await
         .context("Couldn't start songbird client")?;

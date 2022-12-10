@@ -18,7 +18,7 @@ async fn autocomplete_bans<'a>(
         })
 }
 
-///〔🛡️ Administração〕 Bana um usuário
+/// 「STAFF」Bane um membro
 #[poise::command(
     slash_command,
     prefix_command,

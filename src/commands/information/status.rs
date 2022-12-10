@@ -11,7 +11,7 @@ pub const BUILT_AS: &str = "Debug";
 #[cfg(not(debug_assertions))]
 pub const BUILT_AS: &str = "Release (Production)";
 
-///〔🛠️ Depuração〕Veja minhas informações
+/// 「FERRAMENTAS」 Veja minhas informações
 #[poise::command(prefix_command, slash_command)]
 pub async fn status(ctx: Context<'_>) -> Result<()> {
     let (used, used_by_children) =

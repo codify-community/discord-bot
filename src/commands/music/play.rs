@@ -1,9 +1,9 @@
 use crate::primitives::Context;
 use anyhow::{Context as _, Result};
 
-#[poise::command(prefix_command, slash_command)]
-/// Toca uma música
-pub async fn play(
+#[poise::command(prefix_command, slash_command, aliases("play"))]
+/// 「Música」Toca uma música
+pub async fn tocar(
     ctx: Context<'_>,
     #[description = "URL do youtube ou nome"] song: String,
 ) -> Result<()> {

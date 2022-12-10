@@ -4,7 +4,7 @@ use anyhow::Result;
 
 use crate::primitives::Context;
 
-///〔🦁 Geral〕 Veja meu ping
+/// 「GERAL」Veja meu ping
 #[poise::command(prefix_command, slash_command)]
 pub async fn ping(ctx: Context<'_>) -> Result<()> {
     let time = Instant::now();

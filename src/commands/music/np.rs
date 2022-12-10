@@ -4,9 +4,9 @@ use crate::{primitives::Context, utils::time::HumanTime};
 use anyhow::{Context as _, Result};
 use poise::serenity_prelude::Color;
 
-#[poise::command(prefix_command, slash_command, guild_only)]
-/// Informa que música está tocando
-pub async fn np(ctx: Context<'_>) -> Result<()> {
+#[poise::command(prefix_command, slash_command, guild_only, aliases("np"))]
+/// 「Música」Informa a música está tocando agora
+pub async fn tocando(ctx: Context<'_>) -> Result<()> {
     let guild = ctx
         .guild()
         .context("Whoar! Não estou em uma guilda. Esse comando só funciona em uma guidla :>")?;
