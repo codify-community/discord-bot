@@ -7,7 +7,6 @@
 
 use crate::{
     commands::{
-        general::ping::ping,
         information::status::status,
         music::musica,
         staff::{ban::ban, servidor::servidor, unban::unban},
@@ -62,7 +61,6 @@ async fn main() -> Result<()> {
     let guild_id: u64 = env::var("GUILD_ID")?.parse()?;
 
     let commands = vec![
-        ping(),
         status(),
         servidor(),
         userinfo(),
