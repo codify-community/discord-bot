@@ -43,7 +43,7 @@ impl fmt::Display for Humanize {
         match format_dhms(secs) {
             (0, 0, 0, s) => write!(f, "{s} segundos"),
             (0, 0, m, s) => write!(f, "{m} minutos e {s} seconds"),
-            (0, h, m, s) => write!(f, "{h} hora, {m} minutos e {s} segundos"),
+            (0, h, m, s) => write!(f, "{h} horas, {m} minutos e {s} segundos"),
             (d, h, m, s) => write!(f, "{d} dias, {h} horas, {m} minutos e {s}s"),
         }
     }
