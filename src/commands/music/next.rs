@@ -29,7 +29,8 @@ pub async fn proximo(ctx: Context<'_>) -> Result<()> {
         .await?;
     } else {
         ctx.send(|m| {
-            m.ephemeral(true).content(":ok_hand: Feito, Mas não tem nenhuma música na fila agora.".to_string())
+            m.ephemeral(true)
+                .content(":ok_hand: Feito, Mas não tem nenhuma música na fila agora.".to_string())
         })
         .await?;
     }

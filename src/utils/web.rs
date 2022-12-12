@@ -14,7 +14,7 @@ pub async fn request(ctx: &Context<'_>, kind: RequestKind) -> anyhow::Result<Vec
         .get::<Browser>()
         .context("Can't find browser instance")?;
 
-    browser.send(Request { sender, kind })?;
+    browser.send(Request { kind, sender })?;
 
     Ok(result.await?)
 }

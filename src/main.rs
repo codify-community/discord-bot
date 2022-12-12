@@ -62,7 +62,7 @@ async fn main() -> Result<()> {
 
     info!("Starting bot...");
     let guild_id: u64 = env::var("GUILD_ID")?.parse()?;
-    let mut signals = Signals::new(&[SIGINT, SIGTERM, SIGQUIT])?;
+    let mut signals = Signals::new([SIGINT, SIGTERM, SIGQUIT])?;
     let handle = signals.handle();
     let (set_terminating, terminating) = watch::channel(false);
 
