@@ -93,7 +93,7 @@ impl Job for Browser {
 }
 
 impl Browser {
-    #[tracing::instrument(name = "Handle request", skip_all, fields(query = ?request.kind))]
+    #[tracing::instrument(name = "Handle request", skip_all, fields(kind = ?request.kind))]
     async fn handle_request(&mut self, request: Request) -> anyhow::Result<()> {
         match request.kind {
             RequestKind::Google { query } => {

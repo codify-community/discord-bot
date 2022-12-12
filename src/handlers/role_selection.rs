@@ -146,6 +146,7 @@ pub async fn ask_roles(
     Ok(())
 }
 
+#[tracing::instrument(skip(ctx, state), name = "Processing on_interaction_component_create")]
 pub async fn on_interaction_component_create(
     ctx: &Context,
     component: &MessageComponentInteraction,
