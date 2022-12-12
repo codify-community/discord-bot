@@ -1,4 +1,4 @@
-use crate::{primitives::Context, utils::web as browser};
+use crate::{jobs::browser::RequestKind, primitives::Context, utils::web as browser};
 use anyhow::Result;
 use poise::serenity_prelude::AttachmentType;
 
@@ -15,7 +15,7 @@ pub async fn google(
     #[description = "O quê pesquisar"] query: String,
 ) -> Result<()> {
     ctx.defer_or_broadcast().await?;
-    let result = browser::google(&ctx, query).await?;
+    let result = browser::request(&ctx, RequestKind::Google { query }).await?;
 
     ctx.send(|m| {
         m.attachment(AttachmentType::Bytes {

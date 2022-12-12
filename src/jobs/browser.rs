@@ -22,8 +22,14 @@ script.textContent = `document.querySelector('a[href*="/safesearch"]')?.parentNo
 script.remove();"#;
 
 #[derive(Debug)]
-pub enum Request {
-    Google { query: String, sender: Sender },
+pub enum RequestKind {
+    Google { query: String },
+}
+
+#[derive(Debug)]
+pub struct Request {
+    pub kind: RequestKind,
+    pub sender: Sender,
 }
 
 pub struct Browser {
@@ -61,55 +67,67 @@ impl Browser {
 #[poise::async_trait]
 impl Job for Browser {
     async fn start(mut self) -> anyhow::Result<()> {
-        let Self {
-            browser,
-            rx,
-            terminating,
-        } = &mut self;
         tracing::debug!("Waiting requests.");
 
-        select! {
-        Some(request) = rx.recv() => {
-                match request {
-                    Request::Google { query, sender } => {
-                        let started = Instant::now();
+        loop {
+            let Self {
+                rx, terminating, ..
+            } = &mut self;
 
-                        tracing::info!("Searching {query}...");
-                        let uri = format!(
-                            "https://www.google.com/search?client=firefox-b-d&q={}",
-                            &query
-                        );
+            select! {
+                Some(request) = rx.recv() => {
+                    self.handle_request(request).await?;
+                }
 
-                        let Some(browser) = browser else {
-                            bail!("Browser closed");
-                        };
-
-                        let screenshot = browser
-                            .in_new_tab(|| async {
-                                browser.goto(uri).await?;
-                                browser.execute(ENABLE_SAFE_SEARCH, Vec::new()).await?;
-
-                                let screenshot = browser.screenshot_as_png().await?;
-                                Ok(screenshot)
-                            })
-                            .await?;
-
-                        sender
-                            .send(screenshot)
-                            .ok()
-                            .context("Failed to screenshot")?;
-
-                        tracing::info!(completed_in = ?started.elapsed(), query = ?query, "Done");
-                    }
+                _ = terminating.changed() => {
+                    tracing::info!("Closing geckodriver");
+                    let browser = self.browser.take().expect("Browser closed");
+                    browser.quit().await?;
+                    break;
                 }
             }
+        }
 
-            _ = terminating.changed() => {
-                tracing::info!("Closing geckodriver");
-                let browser = browser.take().expect("Browser closed");
-                browser.quit().await?;
+        bail!("Geckodriver closed")
+    }
+}
+
+impl Browser {
+    #[tracing::instrument(name = "Handle request", skip_all, fields(query = ?request.kind))]
+    async fn handle_request(&mut self, request: Request) -> anyhow::Result<()> {
+        match request.kind {
+            RequestKind::Google { query } => {
+                let started = Instant::now();
+
+                tracing::info!("Searching...");
+                let uri = format!(
+                    "https://www.google.com/search?client=firefox-b-d&q={}",
+                    &query
+                );
+
+                let Some(browser) = &mut self.browser else {
+                    bail!("Browser closed");
+                };
+
+                let screenshot = browser
+                    .in_new_tab(|| async {
+                        browser.goto(uri).await?;
+                        browser.execute(ENABLE_SAFE_SEARCH, Vec::new()).await?;
+
+                        let screenshot = browser.screenshot_as_png().await?;
+                        Ok(screenshot)
+                    })
+                    .await?;
+
+                request
+                    .sender
+                    .send(screenshot)
+                    .ok()
+                    .context("Failed to screenshot")?;
+
+                tracing::info!(completed_in = ?started.elapsed(), "Done");
             }
         }
-        bail!("Geckodriver closed")
+        Ok(())
     }
 }
