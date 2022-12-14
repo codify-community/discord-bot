@@ -1,5 +1,4 @@
-pub const CANT_FIND_GUILD: &str =
-    "Opa! Este comando só funciona em um servidor.";
+pub const CANT_FIND_GUILD: &str = "Opa! Este comando só funciona em um servidor.";
 
 pub const CANT_START_SONGBIRD: &str =
     "Whoops! Não foi possível accesar meu controlador de música. Tente novamente mais tarde";
