@@ -23,8 +23,11 @@ use dotenvy::dotenv;
 use poise::{
     builtins::register_in_guild,
     serenity_prelude::{CacheHttp, GatewayIntents, GuildId},
-    Framework, FrameworkOptions, Prefix, PrefixFrameworkOptions,
+    Framework, FrameworkOptions, PrefixFrameworkOptions,
 };
+
+#[cfg(debug_assertions)]
+use poise::Prefix;
 
 use songbird::SerenityInit;
 use tracing_subscriber::EnvFilter;
@@ -75,6 +78,12 @@ async fn main() -> Result<()> {
         nppp(),
     ];
 
+    #[cfg(debug_assertions)]
+    let prefixes = vec![Prefix::Literal(">>")];
+
+    #[cfg(not(debug_assertions))]
+    let prefixes = vec![];
+
     let framework = Framework::builder()
         .token(env::var("DISCORD_TOKEN")?)
         .intents(GatewayIntents::all())
@@ -82,7 +91,7 @@ async fn main() -> Result<()> {
             commands,
             prefix_options: PrefixFrameworkOptions {
                 prefix: Some(".".into()),
-                additional_prefixes: vec![Prefix::Literal(">>"), Prefix::Literal("$ ")],
+                additional_prefixes: prefixes,
                 ..Default::default()
             },
             on_error: |e| Box::pin(on_error(e)),
