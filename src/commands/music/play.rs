@@ -2,7 +2,7 @@ use crate::{
     common::messages::{CANT_FIND_GUILD, CANT_START_SONGBIRD, IM_NOT_IN_A_VOICE_CHANNEL},
     primitives::Context,
 };
-use anyhow::{Context as _, Result};
+use anyhow::{bail, Context as _, Result};
 use songbird::driver::Bitrate;
 
 #[poise::command(prefix_command, slash_command, aliases("play"))]
@@ -28,7 +28,9 @@ pub async fn tocar(
 
     let mut handler = handler.lock().await;
 
-    let input = songbird::ytdl(query).await?;
+    let input = songbird::ytdl(query)
+        .await
+        .or_else(|_| bail!("Não foi possivel encontrar a música."))?;
     let title = input.metadata.title.clone().unwrap_or_default();
 
     handler.enqueue_source(input);
