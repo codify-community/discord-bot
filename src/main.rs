@@ -16,12 +16,12 @@ use crate::{
     primitives::State,
     utils::validations,
 };
-use anyhow::{Context, Result};
+use anyhow::{Context as _, Result};
 use dotenvy::dotenv;
 use poise::{
     builtins::register_in_guild,
     futures_util::StreamExt,
-    serenity_prelude::{CacheHttp, GatewayIntents, GuildId},
+    serenity_prelude::{CacheHttp, Context, GatewayIntents, GuildId},
     Framework, FrameworkOptions, PrefixFrameworkOptions,
 };
 
@@ -38,7 +38,10 @@ use crate::primitives::Database;
 use handlers::on_error::on_error;
 use std::{env, process, time::Instant};
 use sysinfo::{System, SystemExt};
-use tokio::sync::{watch, RwLock};
+use tokio::sync::{
+    watch::{self, Receiver},
+    RwLock,
+};
 use tracing::log::info;
 
 mod commands;
@@ -94,7 +97,7 @@ async fn main() -> Result<()> {
         .options(FrameworkOptions {
             commands,
             prefix_options: PrefixFrameworkOptions {
-                prefix: Some(".".into()),
+                prefix: Some(String::from(".")),
                 additional_prefixes: prefixes,
                 ..Default::default()
             },
@@ -104,39 +107,43 @@ async fn main() -> Result<()> {
             },
             ..Default::default()
         })
-        .setup(move |ctx, _, f| {
-            Box::pin(async move {
-                register_in_guild(&ctx.http(), &f.options().commands, GuildId(guild_id)).await?;
-                let mut jobs = TypeMap::new();
-                let (tx, browser) = Browser::new(terminating.clone()).await?;
-                jobs.insert::<Browser>(tx);
-
-                tokio::spawn(async move {
-                    if let Err(e) = browser.start().await {
-                        if format!("{e}") == "Geckodriver closed" {
-                            tracing::info!("{e}, bye!");
-                            process::exit(0);
-                        } else {
-                            tracing::error!("Geckodriver connection failed: {e}");
-                            process::abort();
-                        }
-                    }
-                });
-
-                Ok(State {
-                    guild_id,
-                    database: Database::init_from_directory(&env::var("DATABASE_LOCATION")?)
-                        .await?,
-                    uptime: Instant::now(),
-                    jobs,
-                    system: RwLock::new(System::new()),
-                })
-            })
-        })
+        .setup(move |ctx, _, f| Box::pin(setup(ctx, f, guild_id, terminating)))
         .client_settings(SerenityInit::register_songbird);
 
     framework.run().await?;
     handle.close();
 
     Ok(())
+}
+
+async fn setup(
+    ctx: &Context,
+    f: &Framework<State, anyhow::Error>,
+    guild_id: u64,
+    terminating: Receiver<bool>,
+) -> Result<State> {
+    register_in_guild(&ctx.http(), &f.options().commands, GuildId(guild_id)).await?;
+    let mut jobs = TypeMap::new();
+    let (tx, browser) = Browser::new(terminating.clone()).await?;
+    jobs.insert::<Browser>(tx);
+
+    tokio::spawn(async move {
+        if let Err(e) = browser.start().await {
+            if e.to_string() == "Geckodriver closed" {
+                tracing::info!("{e}, bye!");
+                process::exit(0);
+            }
+
+            tracing::error!("Geckodriver connection failed: {e}");
+            process::abort();
+        }
+    });
+
+    Ok(State {
+        guild_id,
+        database: Database::init_from_directory(&env::var("DATABASE_LOCATION")?).await?,
+        uptime: Instant::now(),
+        jobs,
+        system: RwLock::new(System::new()),
+    })
 }
