@@ -4,6 +4,7 @@ pub mod next;
 pub mod np;
 pub mod play;
 pub mod queue;
+pub mod remove;
 
 use crate::primitives::Context;
 use anyhow::Result;
@@ -18,7 +19,8 @@ use anyhow::Result;
         "leave::sair",
         "queue::fila",
         "np::tocando",
-        "next::proximo"
+        "next::proximo",
+        "remove::remover"
     )
 )]
 #[allow(clippy::unused_async)]
