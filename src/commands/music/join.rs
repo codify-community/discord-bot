@@ -13,7 +13,10 @@ pub async fn entrar(ctx: Context<'_>) -> Result<()> {
         .voice_states
         .get(&ctx.author().id)
         .and_then(|c| c.channel_id)
-        .context("Ei! Não tenho uma bola de cristal. Então eeh, não consigo adivinhar em qual canal você quer que eu toque a musica, Então você pode entrar em um canal de voz por favor?")?;
+        .context(
+            "Não consigo adivinhar em qual canal você quer que eu toque a musica, \
+             você pode entrar em um canal de voz por favor?",
+        )?;
 
     let client = songbird::get(ctx.serenity_context())
         .await
