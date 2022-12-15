@@ -19,7 +19,7 @@ pub async fn servidor(_ctx: Context<'_>) -> Result<()> {
     Ok(())
 }
 
-///〔🛠️ Staff〕Adiciona uma categoria ao registro
+/// 「STAFF」Adiciona uma categoria ao registro
 #[poise::command(
     prefix_command,
     slash_command,
@@ -34,7 +34,7 @@ pub async fn registro_add_category(
 ) -> Result<()> {
     let started = Instant::now();
     let handle = ctx.say(":stopwatch:").await?;
-    let registro_id = env::var("CODIFY_REGISTRO_ID")?.parse()?;
+    let registro_id = env::var("REGISTRO_ID")?.parse()?;
 
     let Some(channel)  = ctx.guild()
         .unwrap()
@@ -82,7 +82,7 @@ pub async fn registro_add_category(
     Ok(())
 }
 
-///〔🛠️ Staff〕Adiciona um cargo a categoria
+/// 「STAFF」Adiciona um cargo a categoria
 #[poise::command(
     prefix_command,
     slash_command,
@@ -134,7 +134,7 @@ pub async fn registro_add_role(
     Ok(())
 }
 
-///〔🛠️ Staff〕Remove um cargo da categoria
+/// 「STAFF」Remove um cargo da categoria
 #[poise::command(
     prefix_command,
     slash_command,
@@ -188,7 +188,7 @@ pub async fn registro_remove_role(
     Ok(())
 }
 
-///〔🛠️ Staff〕Remove uma categoria
+/// 「STAFF」Remove uma categoria
 #[poise::command(
     prefix_command,
     slash_command,

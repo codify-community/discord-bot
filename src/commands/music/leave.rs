@@ -1,18 +1,25 @@
-use crate::primitives::Context;
-use anyhow::{Context as _, Result};
+use crate::{
+    common::messages::{CANT_FIND_GUILD, CANT_START_SONGBIRD, IM_NOT_IN_A_VOICE_CHANNEL},
+    primitives::Context,
+};
+use anyhow::{bail, Context as _, Result};
 
-#[poise::command(prefix_command, slash_command)]
-/// Desconecta o bot do canal que você está conectado
-pub async fn leave(ctx: Context<'_>) -> Result<()> {
-    let guild = ctx.guild().context("No Guild!")?;
+#[poise::command(prefix_command, slash_command, aliases("leave"))]
+/// 「Música」Desconecta o bot do canal que você está conectado
+pub async fn sair(ctx: Context<'_>) -> Result<()> {
+    let guild = ctx.guild().context(CANT_FIND_GUILD)?;
 
     let client = songbird::get(ctx.serenity_context())
         .await
-        .context("Couldn't start songbird client")?;
+        .context(CANT_START_SONGBIRD)?;
 
-    client.remove(guild.id).await?;
-
-    ctx.say("Pronto :+1:!").await?;
+    if client.get(guild.id).is_some() {
+        client.remove(guild.id).await?;
+        ctx.send(|m| m.ephemeral(true).content(":ok_hand: Feito."))
+            .await?;
+    } else {
+        bail!(IM_NOT_IN_A_VOICE_CHANNEL)
+    }
 
     Ok(())
 }

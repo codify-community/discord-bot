@@ -2,7 +2,7 @@ use crate::primitives::Context;
 use anyhow::Result;
 use poise::serenity_prelude::Member;
 
-///〔🛡️ Administração〕 Bana um usuário
+/// 「STAFF」Bana um usuário
 #[poise::command(
     slash_command,
     prefix_command,

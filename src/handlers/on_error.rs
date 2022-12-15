@@ -1,3 +1,5 @@
+use std::process;
+
 use crate::{primitives::State, utils::log_channel};
 use anyhow::Error;
 use poise::{
@@ -20,8 +22,8 @@ pub fn build_embed(e: &mut CreateEmbed, error: Error) -> &mut CreateEmbed {
 pub async fn on_error(error: FrameworkError<'_, State, Error>) {
     match error {
         FrameworkError::Setup { error, .. } => {
-            tracing::error!("{error}");
-            panic!("Setup error (check logs)");
+            tracing::error!("Setup error: {error}");
+            process::abort();
         }
 
         FrameworkError::EventHandler {
