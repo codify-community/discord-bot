@@ -17,9 +17,9 @@ pub async fn proximo(ctx: Context<'_>) -> Result<()> {
 
     let handler = handler.lock().await;
 
-    handler.queue().skip()?;
+    if let Some(rn) = handler.queue().current_queue().iter().skip(1).next() {
+        handler.queue().skip()?;
 
-    if let Some(rn) = handler.queue().current() {
         ctx.send(|m| {
             m.ephemeral(true).content(format!(
                 ":ok_hand: Feito. Agora estou tocando `{}`",
@@ -30,7 +30,7 @@ pub async fn proximo(ctx: Context<'_>) -> Result<()> {
     } else {
         ctx.send(|m| {
             m.ephemeral(true)
-                .content(":ok_hand: Feito, Mas não tem nenhuma música na fila agora.".to_string())
+                .content(":ok_hand: Feito, mas não tem nenhuma música na fila agora então eu continuarei a tocar a música atual.".to_string())
         })
         .await?;
     }
