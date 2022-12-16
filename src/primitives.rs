@@ -5,7 +5,6 @@ use std::{path::Path, time::Instant};
 use sysinfo::System;
 use tokio::{fs, sync::RwLock};
 use tracing::{debug, info};
-use typemap_rev::TypeMap;
 
 pub const REGISTRO_ROLE_MARKER: &str = " **·**";
 
@@ -44,7 +43,6 @@ pub struct State {
     pub uptime: Instant,
     pub system: RwLock<System>,
     pub database: Database,
-    pub jobs: TypeMap,
     pub guild_id: u64,
 }
 

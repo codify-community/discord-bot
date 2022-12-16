@@ -3,7 +3,6 @@ use std::{env::var, path::Path};
 
 pub fn env() -> anyhow::Result<()> {
     find_var("DISCORD_TOKEN")?;
-    find_var("GECKODRIVER_ADDRESS")?;
 
     try_id("REGISTRO_ID")?;
     try_id("LOG_CHANNEL_ID")?;
