@@ -5,8 +5,8 @@ use crate::{
 use anyhow::{Context as _, Result};
 
 #[poise::command(prefix_command, slash_command, aliases("remove"))]
-/// 「Música」Pula para a proxima música
-pub async fn remover(ctx: Context<'_>, id: usize) -> Result<()> {
+/// 「Música」Remove uma música pelo ID dela
+pub async fn remover(ctx: Context<'_>, #[description = "Número da fila que você quer remover"] id: usize) -> Result<()> {
     let client = songbird::get(ctx.serenity_context())
         .await
         .context(CANT_START_SONGBIRD)?;
