@@ -17,7 +17,7 @@ pub async fn proximo(ctx: Context<'_>) -> Result<()> {
 
     let handler = handler.lock().await;
 
-    if let Some(rn) = handler.queue().current_queue().iter().nth(1) {
+    if let Some(rn) = handler.queue().current_queue().get(1) {
         handler.queue().skip()?;
 
         ctx.send(|m| {
