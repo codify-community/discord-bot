@@ -1,0 +1,12 @@
+
+
+services:
+  bot-discord:
+    container_name: bot-discord
+    build: .
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - ./db:/app/db
+    
